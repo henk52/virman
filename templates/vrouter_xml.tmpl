@@ -1,0 +1,73 @@
+<domain type='kvm'>
+  <name>{ $szGuestName }</name>
+  <title>{ $szGuestTitle }</title>
+  <description>{ $szGuestDescription }</description>
+  <memory unit='KiB'>{ $szGuestMemory }</memory>
+  <vcpu placement='static'>1</vcpu>
+  <os>
+    <type arch='x86_64' machine='pc-i440fx-1.6'>hvm</type>
+    <boot dev='hd'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+  <clock offset='utc'>
+    <timer name='rtc' tickpolicy='catchup'/>
+    <timer name='pit' tickpolicy='delay'/>
+    <timer name='hpet' present='no'/>
+  </clock>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>restart</on_crash>
+  <devices>
+    <emulator>/usr/bin/qemu-kvm</emulator>
+    <disk type='{ $szGuestDiskType }' device='disk'>
+      <driver name='qemu' type='{ $szGuestDriverType }'/>
+      <source { $szGuestDiskSourceTypeName }='{ $szGuestStorageDevice }'/>
+      <target dev='vda' bus='virtio'/>
+    </disk>
+    <controller type='usb' index='0' model='ich9-ehci1'>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x7'/>
+    </controller>
+    <controller type='usb' index='0' model='ich9-uhci1'>
+      <master startport='0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0' multifunction='on'/>
+    </controller>
+    <controller type='usb' index='0' model='ich9-uhci2'>
+      <master startport='2'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x1'/>
+    </controller>
+    <controller type='usb' index='0' model='ich9-uhci3'>
+      <master startport='4'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x2'/>
+    </controller>
+    <controller type='pci' index='0' model='pci-root'/>
+{ foreach my $szBridgeName (@arPublicNetworkList) {
+  $OUT .= "<interface type='bridge'>\n";
+  $OUT .= "  <source bridge='$szBridgeName'/>\n";
+  $OUT .= "  <model type='virtio'/>\n";
+  $OUT .= "</interface>\n";
+  }
+}
+{ foreach my $szPrivateNetworkName (@arPrivateNetworkList) {
+   $OUT .= "<interface type='network'>\n";
+   $OUT .= "  <source network='$szPrivateNetworkName'/>\n";
+   $OUT .= "  <model type='virtio'/>\n";
+   $OUT .= "</interface>\n";
+  }
+}
+    <serial type='pty'>
+      <target port='0'/>
+    </serial>
+    <console type='pty'>
+      <target type='serial' port='0'/>
+    </console>
+    <input type='tablet' bus='usb'/>
+    <memballoon model='virtio'>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x0'/>
+    </memballoon>
+  </devices>
+</domain>
+
