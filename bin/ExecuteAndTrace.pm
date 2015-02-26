@@ -32,6 +32,7 @@ sub DieIfExecuteFails {
 
   my @arOutput = `$szCmd`;
   if ( $? != 0 ) {
+    Log("EEE $szCmd");
     confess("!!! operaiont failed: @arOutput");
   }
 } # end DieIfExecuteFails
