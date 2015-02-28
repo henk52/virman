@@ -45,6 +45,9 @@ $hMachineConfiguration{'szGuestDriverType'} = 'qcow2';
 
 $hMachineConfiguration{'szGuestDiskSourceTypeName'} = 'file';
 $hMachineConfiguration{'szGuestStorageDevice'} = "${szVirshFilePoolPath}/$hMachineConfiguration{'szGuestName'}.qcow2";
+# TODO V put this in a proctected subdir.
+my $f_szInstanceNumber = "001";
+$hMachineConfiguration{'szIsoImage'} = "/var/$hMachineConfiguration{'szGuestName'}${f_szInstanceNumber}-cidata.iso";
 
 my @arPublicNetworkList = (
   'virbr0',
@@ -94,13 +97,12 @@ sub GenerateCloudInitIsoImage {
   print USERDATA "   - $szSshPublicKey\n";
   close(USERDATA);
 
-  Log("III Generate ISO image: ${szDomainName}${szInstanceNumber}-cidata.iso");
-  DieIfExecuteFails("genisoimage -output ${szDomainName}${szInstanceNumber}-cidata.iso -volid cidata -joliet -rock user-data meta-data");
+  Log("III Generate ISO image: $hMachineConfiguration{'szIsoImage'}");
+  DieIfExecuteFails("genisoimage -output $hMachineConfiguration{'szIsoImage'} -volid cidata -joliet -rock user-data meta-data");
 }
 
 
-GenerateCloudInitIsoImage($hMachineConfiguration{'szGuestName'}, "001");
-die("!!! Drop out here because this is a test.");
+GenerateCloudInitIsoImage($hMachineConfiguration{'szGuestName'}, $f_szInstanceNumber);
 
 # ====================================== MAIN ============================================ 
 my $uri = 'qemu:///system';
@@ -129,6 +131,7 @@ Log("III Writing: $hMachineConfiguration{'szGasBaseDirectory'}/$hMachineConfigur
 open (OUTPUT_TEMPLATE, ">$hMachineConfiguration{'szGasBaseDirectory'}/$hMachineConfiguration{'szGuestName'}.xml") || die("!!! failed to open file for write: $hMachineConfiguration{'szGasBaseDirectory'}/$hMachineConfiguration{'szGuestName'}.xml - $!");
 print OUTPUT_TEMPLATE "$szResult";
 close(OUTPUT_TEMPLATE);
+
 
 # TODO Also support LVM.
 if ( $hMachineConfiguration{'szGuestDriverType'} eq 'qcow2' ) {

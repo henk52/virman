@@ -28,6 +28,15 @@
       <source { $szGuestDiskSourceTypeName }='{ $szGuestStorageDevice }'/>
       <target dev='vda' bus='virtio'/>
     </disk>
+{ if ( defined($szIsoImage) ) {
+    $OUT .= "    <disk type='file' device='cdrom'>\n";
+    $OUT .= "      <driver name='qemu' type='raw'/>\n";
+    $OUT .= "      <source file='$szIsoImage'/>\n";
+    $OUT .= "      <target dev='hdc' bus='ide'/>\n";
+    $OUT .= "      <readonly/>\n";
+    $OUT .= "    </disk>\n";
+  }
+}
     <controller type='usb' index='0' model='ich9-ehci1'>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x7'/>
     </controller>
@@ -45,17 +54,17 @@
     </controller>
     <controller type='pci' index='0' model='pci-root'/>
 { foreach my $szBridgeName (@arPublicNetworkList) {
-  $OUT .= "<interface type='bridge'>\n";
-  $OUT .= "  <source bridge='$szBridgeName'/>\n";
-  $OUT .= "  <model type='virtio'/>\n";
-  $OUT .= "</interface>\n";
+  $OUT .= "    <interface type='bridge'>\n";
+  $OUT .= "      <source bridge='$szBridgeName'/>\n";
+  $OUT .= "      <model type='virtio'/>\n";
+  $OUT .= "    </interface>\n";
   }
 }
 { foreach my $szPrivateNetworkName (@arPrivateNetworkList) {
-   $OUT .= "<interface type='network'>\n";
-   $OUT .= "  <source network='$szPrivateNetworkName'/>\n";
-   $OUT .= "  <model type='virtio'/>\n";
-   $OUT .= "</interface>\n";
+   $OUT .= "    <interface type='network'>\n";
+   $OUT .= "      <source network='$szPrivateNetworkName'/>\n";
+   $OUT .= "      <model type='virtio'/>\n";
+   $OUT .= "    </interface>\n";
   }
 }
     <serial type='pty'>
