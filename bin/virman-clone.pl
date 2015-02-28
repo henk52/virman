@@ -19,6 +19,9 @@ use XML::Simple;
 
 my $szTemplatePath = "$FindBin::RealBin/../templates";
 
+# TODO C put this in a protected directory.
+my $f_szGeneralContainerKeyFile = "/etc/bilby_rsa";
+
 my $szVirshFilePoolPath = '/virt_images';
 
 my %hMachineConfiguration;
@@ -57,6 +60,49 @@ my @arPrivateNetworkList = (
 
 $hMachineConfiguration{'arPrivateNetworkList'} = \@arPrivateNetworkList;
 
+
+# ----------------------------------------------------
+# See: http://www.projectatomic.io/blog/2014/10/getting-started-with-cloud-init/
+# ------------------
+sub GenerateCloudInitIsoImage {
+  my $szDomainName = shift; 
+  my $szInstanceNumber = shift;
+  # TODO N Barf on missing data.
+  # TODO V Barf on IDs already in use.
+
+  Log("III write: meta-data");
+  # TODO V Write these files to a unique subdirectory so that multiple operations can be done in parallel.
+  open(METADATA, ">meta-data") || die("!!! Failed to open for write: 'meta-data' - $!");
+  print METADATA "instance-id: $szDomainName$szInstanceNumber\n";
+  print METADATA "local-hostname: $szDomainName-$szInstanceNumber\n";
+  close(METADATA);
+
+  if ( ! -f  "${f_szGeneralContainerKeyFile}.pub" ) {
+    DieIfExecuteFails("ssh-keygen -f ${f_szGeneralContainerKeyFile} -t rsa -N \"\"");
+  }
+
+  my $szSshPublicKey = `cat ${f_szGeneralContainerKeyFile}.pub`;
+  chomp($szSshPublicKey);
+
+  Log("III write: user-data");
+  open(USERDATA, ">user-data") || die("!!! Failed to open for write: 'user-data' - $!");
+  print USERDATA "#cloud-config\n";
+  print USERDATA "password: secret\n";
+  print USERDATA "chpasswd: { expire: False }\n";
+  print USERDATA "ssh_pwauth: True\n";
+  print USERDATA "ssh_authorized_keys:\n";
+  print USERDATA "   - $szSshPublicKey\n";
+  close(USERDATA);
+
+  Log("III Generate ISO image: ${szDomainName}${szInstanceNumber}-cidata.iso");
+  DieIfExecuteFails("genisoimage -output ${szDomainName}${szInstanceNumber}-cidata.iso -volid cidata -joliet -rock user-data meta-data");
+}
+
+
+GenerateCloudInitIsoImage($hMachineConfiguration{'szGuestName'}, "001");
+die("!!! Drop out here because this is a test.");
+
+# ====================================== MAIN ============================================ 
 my $uri = 'qemu:///system';
 my $vmm = Sys::Virt->new(uri => $uri);
 my $dom = $vmm->get_domain_by_name($f_szFedoraBaseName);
