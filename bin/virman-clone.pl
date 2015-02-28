@@ -13,6 +13,9 @@ use Data::Dumper;
 use Text::Template;
 use FindBin;
 use ExecuteAndTrace;
+use Sys::Virt;
+use Sys::Virt::Domain;
+use XML::Simple;
 
 my $szTemplatePath = "$FindBin::RealBin/../templates";
 
@@ -54,6 +57,13 @@ my @arPrivateNetworkList = (
 
 $hMachineConfiguration{'arPrivateNetworkList'} = \@arPrivateNetworkList;
 
+my $uri = 'qemu:///system';
+my $vmm = Sys::Virt->new(uri => $uri);
+my $dom = $vmm->get_domain_by_name($f_szFedoraBaseName);
+my $flags=0;
+my $xml = $dom->get_xml_description($flags);
+my  $ref = XMLin($xml);
+
 
 print "---------------------\n";
 my $szTemplateFile = "$szTemplatePath/vrouter_xml.tmpl";
@@ -76,8 +86,12 @@ close(OUTPUT_TEMPLATE);
 
 # TODO Also support LVM.
 if ( $hMachineConfiguration{'szGuestDriverType'} eq 'qcow2' ) {
+  # TODO Get the driver to make sure it is a 'qcow2'.
+  my $szBackingFileQcow2 = $ref->{'devices'}{'disk'}{'source'}{'file'};
+
   Log("III Cloning  image from $f_szFedoraBaseName for use by $hMachineConfiguration{'szGuestName'} to $hMachineConfiguration{'szGuestStorageDevice'}");
-  DieIfExecuteFails("qemu-img create -f qcow2 -o backing_file=/virt_images/baseks-1.qcow2 $hMachineConfiguration{'szGuestStorageDevice'}");
+  DieIfExecuteFails("qemu-img create -f qcow2 -o backing_file=$szBackingFileQcow2 $hMachineConfiguration{'szGuestStorageDevice'}");
+
   #Log("III Cloning $f_szFedoraBaseName for use by $hMachineConfiguration{'szGuestName'} to $hMachineConfiguration{'szGuestStorageDevice'}");
   #DieIfExecuteFails("virt-clone --connect qemu:///system --original $f_szFedoraBaseName --name $hMachineConfiguration{'szGuestName'} --file $hMachineConfiguration{'szGuestStorageDevice'}");
   #DieIfExecuteFails("virt-clone --connect qemu:///system --original baseks --name vrouter --file /virt_images/vrouter.qcow2");
