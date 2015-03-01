@@ -47,8 +47,12 @@ if ( $dom->is_active() ) {
   print "III undefine the domain $szDomainName.\n";
   $dom->undefine();
  
-  my $szBackingFileQcow2 = $ref->{'devices'}{'disk'}{'source'}{'file'};
-  print "III remove the storage for $szDomainName - $szBackingFileQcow2\n";
-  unlink($szBackingFileQcow2);
+  #my $szBackingFileQcow2 = $ref->{'devices'}{'disk'}{'source'}{'file'};
+  #print Dumper($ref->{'devices'}{'disk'});
+  foreach my $refhDiskInfo (@{$ref->{'devices'}{'disk'}}) {
+    my $szBackingFileQcow2 = $refhDiskInfo->{'source'}{'file'};
+    print "III remove the storage for $szDomainName - $szBackingFileQcow2\n";
+    unlink($szBackingFileQcow2);
+  }
 
 Log("III Done.\n");
