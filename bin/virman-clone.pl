@@ -18,6 +18,7 @@ use Sys::Virt::Domain;
 use XML::Simple;
 
 my $szTemplatePath = "$FindBin::RealBin/../templates";
+my $szFilesPath = "$FindBin::RealBin/../files";
 
 # TODO C put this in a protected directory.
 my $f_szGeneralContainerKeyFile = "/etc/bilby_rsa";
@@ -87,6 +88,10 @@ sub GenerateCloudInitIsoImage {
   my $szSshPublicKey = `cat ${f_szGeneralContainerKeyFile}.pub`;
   chomp($szSshPublicKey);
 
+  my $szGlobalYamlGzipBin = `base64 --wrap=0 ${szFilesPath}/global.yaml.gz`;
+  #my @arGlobalYamlGzipBinBase64List = `base64 --wrap=0 ${szFilesPath}/global.yaml.gz`;
+  #my $szGlobalYamlGzipBin = join('', @arGlobalYamlGzipBinBase64List);
+
   Log("III write: user-data");
   open(USERDATA, ">user-data") || die("!!! Failed to open for write: 'user-data' - $!");
   print USERDATA "#cloud-config\n";
@@ -95,6 +100,19 @@ sub GenerateCloudInitIsoImage {
   print USERDATA "ssh_pwauth: True\n";
   print USERDATA "ssh_authorized_keys:\n";
   print USERDATA "   - $szSshPublicKey\n";
+  print USERDATA "\n";
+  print USERDATA "write_files:\n";
+  print USERDATA "  - path: /etc/puppet/data/global.yaml\n";
+  print USERDATA "    permissions: 0644\n";
+  print USERDATA "    owner: root\n";
+  print USERDATA "    encoding: gzip+base64\n";
+  print USERDATA "    content: |\n";
+#  print USERDATA "    content: !!binary |\n";
+  print USERDATA "      $szGlobalYamlGzipBin\n";
+  print USERDATA "\n";
+  print USERDATA "\n";
+  print USERDATA "\n";
+  print USERDATA "\n";
   close(USERDATA);
 
   Log("III Generate ISO image: $hMachineConfiguration{'szIsoImage'}");
