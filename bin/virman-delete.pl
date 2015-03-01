@@ -5,6 +5,11 @@ use strict;
 # Purpose: create a machine instance, base on a given base machine and template.
 # TODO provide template name in CLI.
 
+# TODO BUG sometimes the disklist is an arrya, sometimes it is not
+#  Maybe force array?
+#  Not an ARRAY reference at ./virman-delete.pl line 52.
+
+
 # Steps:
 #  Generate the machine definition in /opt/gas/
 
