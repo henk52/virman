@@ -112,6 +112,7 @@ sub ReadRoleConfiguration {
 # ------------------
 sub GenerateCloudInitIsoImage {
   my $refhRoleConfiguration = shift;
+  my $refhVirmanConfiguration = shift;
   my $szDomainName = shift; 
   my $szInstanceNumber = shift;
   # TODO N Barf on missing data.
@@ -191,6 +192,8 @@ sub GenerateCloudInitIsoImage {
 }
 
 
+# ----------------------------------------------------
+# ----------------------------------------------------
 sub SetMachineConfiguration {
   my $refhMachineConfiguration = shift;
   my $refhVirmanConfiguration = shift;
@@ -202,8 +205,8 @@ sub SetMachineConfiguration {
   $hMachineConfiguration{'szGasBaseDirectory'} = '/opt/gas';
 
   # TODO title and description should be retrieved from the role.xml file.
-  $hMachineConfiguration{'szGuestTitle'} = 'Virtual Router';
-  $hMachineConfiguration{'szGuestDescription'} = 'Virtual router.';
+  $hMachineConfiguration{'szGuestTitle'} = "Virtual $szDomainName";
+  $hMachineConfiguration{'szGuestDescription'} = "Virtual $szDomainName.";
  
   # The amount of memory allocate to the Guest in KiB.
   $hMachineConfiguration{'szGuestMemory'} = '786432';
