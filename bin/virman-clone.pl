@@ -20,6 +20,7 @@ use XML::Simple;
 my %f_hVirmanConfiguration;
 my $f_szVirmanConfigurationFile = "/etc/virman/default.xml";
 
+my $f_szInstanceNumber = "001";
 
 my $szTemplatePath = "$FindBin::RealBin/../templates";
 my $szFilesPath = "$FindBin::RealBin/../files";
@@ -30,29 +31,6 @@ my $f_szGeneralContainerKeyFile = "/etc/bilby_rsa";
 my $szVirshFilePoolPath = '/virt_images';
 
 my %hMachineConfiguration;
-
-my $f_szFedoraBaseName = 'baseks';
-
-$hMachineConfiguration{'szGasBaseDirectory'} = '/opt/gas';
-
-
-$hMachineConfiguration{'szGuestName'} = 'vrouter';
-$hMachineConfiguration{'szGuestTitle'} = 'Virtual Router';
-$hMachineConfiguration{'szGuestDescription'} = 'Virtual router.';
-
-# The amount of memory allocate to the Guest in KiB.
-$hMachineConfiguration{'szGuestMemory'} = '786432';
-
-# file: cqow2
-$hMachineConfiguration{'szGuestDiskType'} = 'file';
-
-$hMachineConfiguration{'szGuestDriverType'} = 'qcow2';
-
-$hMachineConfiguration{'szGuestDiskSourceTypeName'} = 'file';
-$hMachineConfiguration{'szGuestStorageDevice'} = "${szVirshFilePoolPath}/$hMachineConfiguration{'szGuestName'}.qcow2";
-# TODO V put this in a proctected subdir.
-my $f_szInstanceNumber = "001";
-$hMachineConfiguration{'szIsoImage'} = "/var/$hMachineConfiguration{'szGuestName'}${f_szInstanceNumber}-cidata.iso";
 
 my @arPublicNetworkList = (
   'virbr0',
@@ -100,6 +78,10 @@ sub ReadRoleConfiguration {
     $refConfHash->{'NameOfAdminUserAccount'}   = ${$config->{'NameOfAdminUserAccount'}}[0];
   }
 
+  if ( exists($config->{'BaseDomainName'}) ) {
+    $refConfHash->{'BaseDomainName'}   = ${$config->{'BaseDomainName'}}[0];
+  }
+
   if ( exists($config->{'RunCommand'}) ) {
     my @arRunCommand   = $config->{'RunCommand'};
     #$refConfHash->{'RunCommand'} = \@arRunCommand;
@@ -129,10 +111,13 @@ sub ReadRoleConfiguration {
 # See: http://www.projectatomic.io/blog/2014/10/getting-started-with-cloud-init/
 # ------------------
 sub GenerateCloudInitIsoImage {
+  my $refhRoleConfiguration = shift;
   my $szDomainName = shift; 
   my $szInstanceNumber = shift;
   # TODO N Barf on missing data.
   # TODO V Barf on IDs already in use.
+
+  my %hRoleConfiguration = %{$refhRoleConfiguration};
 
   Log("III write: meta-data");
   # TODO V Write these files to a unique subdirectory so that multiple operations can be done in parallel.
@@ -148,9 +133,6 @@ sub GenerateCloudInitIsoImage {
 
   my $szSshPublicKey = `cat ${f_szGeneralContainerKeyFile}.pub`;
   chomp($szSshPublicKey);
-
-  my %hRoleConfiguration;
-  ReadRoleConfiguration(\%hRoleConfiguration, "$f_hVirmanConfiguration{'RolesRelativePath'}/${szDomainName}.xml");
 
   
   my $szAdminName = 'vagrant';
@@ -178,8 +160,8 @@ sub GenerateCloudInitIsoImage {
   print USERDATA "      - $szSshPublicKey\n";
   print USERDATA "\n";
   if ( exists($hRoleConfiguration{'FileProvidedDuringCloudInit'}) ) {
+    print USERDATA "write_files:\n";
     foreach my $refFileEntry ( @{$hRoleConfiguration{'FileProvidedDuringCloudInit'}} ) {
-      print USERDATA "write_files:\n";
       print USERDATA "  - path: $refFileEntry->{'DestinationFile'}\n";
       print USERDATA "    permissions: 0644\n";
       print USERDATA "    owner: root\n";
@@ -191,9 +173,13 @@ sub GenerateCloudInitIsoImage {
     }
     print USERDATA "\n";
   }
-  print USERDATA "runcmd:\n";
-  print USERDATA "  - git clone http://10.1.233.3:/git/zcci-vrouter.git /etc/puppet/modules/vrouter\n";
-  print USERDATA "  - puppet apply /etc/puppet/modules/vrouter/tests/init.pp\n";
+  if ( exists($hRoleConfiguration{'RunCommand'}) ) {
+    print USERDATA "runcmd:\n";
+    foreach my $szRunCmd ( @{$hRoleConfiguration{'RunCommand'}} ) {
+      print USERDATA "  - $szRunCmd\n";
+    }
+    print USERDATA "\n";
+  }
   print USERDATA "\n";
   # TODO V Add a phone_home
   print USERDATA "\n";
@@ -205,25 +191,70 @@ sub GenerateCloudInitIsoImage {
 }
 
 
+sub SetMachineConfiguration {
+  my $refhMachineConfiguration = shift;
+  my $refhVirmanConfiguration = shift;
+  my $szDomainName = shift;
+
+  $hMachineConfiguration{'szGuestName'} = $szDomainName;
+
+# TODO C Support a dir for the instance machine dom.xml files.
+  $hMachineConfiguration{'szGasBaseDirectory'} = '/opt/gas';
+
+  # TODO title and description should be retrieved from the role.xml file.
+  $hMachineConfiguration{'szGuestTitle'} = 'Virtual Router';
+  $hMachineConfiguration{'szGuestDescription'} = 'Virtual router.';
+ 
+  # The amount of memory allocate to the Guest in KiB.
+  $hMachineConfiguration{'szGuestMemory'} = '786432';
+
+  # file: cqow2
+  $hMachineConfiguration{'szGuestDiskType'} = 'file';
+
+  $hMachineConfiguration{'szGuestDriverType'} = 'qcow2';
+
+  $hMachineConfiguration{'szGuestDiskSourceTypeName'} = 'file';
+  $hMachineConfiguration{'szGuestStorageDevice'} = "${szVirshFilePoolPath}/$hMachineConfiguration{'szGuestName'}.qcow2";
+  # TODO V put this in a proctected subdir.
+  $hMachineConfiguration{'szIsoImage'} = "$refhVirmanConfiguration->{'CloudInitIsoFiles'}/$hMachineConfiguration{'szGuestName'}${f_szInstanceNumber}-cidata.iso";
+
+}
+
 
 # ====================================== MAIN ============================================ 
 
+my $szDomainName = shift || die("!!! You must provide a role name.");
+
+
+# TODO Support list the supported roles.
+# TODO Support manual instance number?
+
 
 LoadVirmanConfiguration(\%f_hVirmanConfiguration, $f_szVirmanConfigurationFile);
-GenerateCloudInitIsoImage($hMachineConfiguration{'szGuestName'}, $f_szInstanceNumber);
+
+if ( ! -f "$f_hVirmanConfiguration{'RolesRelativePath'}/${szDomainName}.xml" ) {
+  die("!!! Domain name '$szDomainName' does not have a role.xml file in $f_hVirmanConfiguration{'RolesRelativePath'}");
+}
+
+SetMachineConfiguration(\%hMachineConfiguration, \%f_hVirmanConfiguration, $szDomainName);
+
+my %hRoleConfiguration;
+ReadRoleConfiguration(\%hRoleConfiguration, "$f_hVirmanConfiguration{'RolesRelativePath'}/${szDomainName}.xml");
+
+
+GenerateCloudInitIsoImage(\%hRoleConfiguration, \%f_hVirmanConfiguration, $hMachineConfiguration{'szGuestName'}, $f_szInstanceNumber);
 
 
 my $uri = 'qemu:///system';
 my $vmm = Sys::Virt->new(uri => $uri);
-my $dom = $vmm->get_domain_by_name($f_szFedoraBaseName);
+my $dom = $vmm->get_domain_by_name($hRoleConfiguration{'BaseDomainName'});
 my $flags=0;
 my $xml = $dom->get_xml_description($flags);
 my  $ref = XMLin($xml);
 
 
 print "---------------------\n";
-my $szTemplateFile = "$szTemplatePath/vrouter_xml.tmpl";
-#my $szTemplateFile = "$szTemplatePath/test.tmpl";
+my $szTemplateFile = "$szTemplatePath/domain_xml.tmpl";
 
 my $template = Text::Template->new(TYPE => 'FILE', SOURCE => "$szTemplateFile")
          or die "Couldn't construct template: $Text::Template::ERROR";
@@ -246,12 +277,11 @@ if ( $hMachineConfiguration{'szGuestDriverType'} eq 'qcow2' ) {
   # TODO Get the driver to make sure it is a 'qcow2'.
   my $szBackingFileQcow2 = $ref->{'devices'}{'disk'}{'source'}{'file'};
 
-  Log("III Cloning  image from $f_szFedoraBaseName for use by $hMachineConfiguration{'szGuestName'} to $hMachineConfiguration{'szGuestStorageDevice'}");
+  Log("III Cloning  image from $hRoleConfiguration{'BaseDomainName'} for use by $hMachineConfiguration{'szGuestName'} to $hMachineConfiguration{'szGuestStorageDevice'}");
   DieIfExecuteFails("qemu-img create -f qcow2 -o backing_file=$szBackingFileQcow2 $hMachineConfiguration{'szGuestStorageDevice'}");
 
-  #Log("III Cloning $f_szFedoraBaseName for use by $hMachineConfiguration{'szGuestName'} to $hMachineConfiguration{'szGuestStorageDevice'}");
-  #DieIfExecuteFails("virt-clone --connect qemu:///system --original $f_szFedoraBaseName --name $hMachineConfiguration{'szGuestName'} --file $hMachineConfiguration{'szGuestStorageDevice'}");
-  #DieIfExecuteFails("virt-clone --connect qemu:///system --original baseks --name vrouter --file /virt_images/vrouter.qcow2");
+  #Log("III Cloning $hRoleConfiguration{'BaseDomainName'} for use by $hMachineConfiguration{'szGuestName'} to $hMachineConfiguration{'szGuestStorageDevice'}");
+  #DieIfExecuteFails("virt-clone --connect qemu:///system --original $hRoleConfiguration{'BaseDomainName'} --name $hMachineConfiguration{'szGuestName'} --file $hMachineConfiguration{'szGuestStorageDevice'}");
   #DieIfExecuteFails("virt-clone --connect qemu:///system --original $f_szFedoraBaseName --name $hMachineConfiguration{'szGuestName'} --file $hMachineConfiguration{'szGuestStorageDevice'}");
 
   Log("III Create the instance of $hMachineConfiguration{'szGuestName'}");
