@@ -2,6 +2,13 @@
 
 use strict;
 
+use FindBin;
+
+BEGIN {
+  push( @INC, "$FindBin::RealBin" );    ## Path to local modules
+}
+
+
 # Purpose: create a machine instance, base on a given base machine and template.
 # TODO provide template name in CLI.
 
@@ -54,7 +61,15 @@ if ( $dom->is_active() ) {
  
   #my $szBackingFileQcow2 = $ref->{'devices'}{'disk'}{'source'}{'file'};
   #print Dumper($ref->{'devices'}{'disk'});
-  foreach my $refhDiskInfo (@{$ref->{'devices'}{'disk'}}) {
+  
+  my @arDiskList;
+  my $szRefType = ref($ref->{'devices'}{'disk'});
+  if ( $szRefType eq "ARRAY" ) {
+    @arDiskList = @{$ref->{'devices'}{'disk'}};
+  } else {
+    push(@arDiskList, $ref->{'devices'}{'disk'});
+  }
+  foreach my $refhDiskInfo (@arDiskList) {
     my $szBackingFileQcow2 = $refhDiskInfo->{'source'}{'file'};
     print "III remove the storage for $szDomainName - $szBackingFileQcow2\n";
     unlink($szBackingFileQcow2);
