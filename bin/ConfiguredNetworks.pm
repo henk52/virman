@@ -40,6 +40,7 @@ $VERSION = 0.1.0;
 # If you want to create a global var, create it as 'our'
 @EXPORT = qw(
                 &CfgNetsLoadXml
+                &GetListOfBridgeNetworkNames
             );
 
 
@@ -74,8 +75,25 @@ sub CfgNetsLoadXml {
 
 # -----------------------------------------------------------------
 # ---------------
+sub GetListOfBridgeNetworkNames {
+  my $xmlTree = shift;
 
-#GetListOfBridgedNetworks
+  my @arNetworkNameList;
+
+  foreach my $refhNetwork (@{$xmlTree->{'Network'}}) {
+    #print Dumper($refhNetwork);
+    if ( $refhNetwork->{'Type'} eq 'bridge' ) {
+      push(@arNetworkNameList, $refhNetwork->{'Name'});
+    }
+  }
+  return(\@arNetworkNameList);
+}
+
+# Create a common function wich is common and has a second parm of 'type'
+
+# -----------------------------------------------------------------
+# ---------------
+
 #GetListOfInternalNetworks
 
 # This ends the perl module/package definition.
