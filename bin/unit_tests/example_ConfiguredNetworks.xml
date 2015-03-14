@@ -1,8 +1,7 @@
 <xml>
 <VIRMAN_CONFIGURED_NETWORK Version="0.1.0">
-  <Network Name="default" Type="bridge">
-  </Network>
-  <Network Name="internal" Type="network">
-  </Network>
+  <Network Name="default" Type="bridge"></Network>
+  <Network Name="internal" Type="network"></Network>
+  <Network Name="external" Type="network"></Network>
 </VIRMAN_CONFIGURED_NETWORK>
 </xml>

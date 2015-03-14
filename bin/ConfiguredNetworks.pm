@@ -10,16 +10,14 @@ use strict;
 #
 #----------------------------------- PURPOSE ------------------------------------
 #
-#This module will 
+# This module will provide the perl interface to the 
+#   /etc/virman/configured_networks.xml
 #
 #----------------------------------- SYNOPSIS -----------------------------------
 #
 #--------------------------- GLOBAL DATA DESCRIPTION ----------------------------
 #---------------------------- PROJECT SPECIFIC DATA -----------------------------
 #
-#---------------------------------- REVISIONS -----------------------------------
-#Date        Name            Description
-#----------- ------------    ----------------------------------------------------
 #---------------------------- DESCRIPTION OF LOGIC ------------------------------
 #
 #
@@ -41,6 +39,7 @@ $VERSION = 0.1.0;
 @EXPORT = qw(
                 &CfgNetsLoadXml
                 &GetListOfBridgeNetworkNames
+                &GetListOfInternalNetworks
             );
 
 
@@ -75,26 +74,45 @@ sub CfgNetsLoadXml {
 
 # -----------------------------------------------------------------
 # ---------------
-sub GetListOfBridgeNetworkNames {
+sub GetListOfNetworkNamesForGivenType {
   my $xmlTree = shift;
+  my $szType  = shift;
 
   my @arNetworkNameList;
 
   foreach my $refhNetwork (@{$xmlTree->{'Network'}}) {
     #print Dumper($refhNetwork);
-    if ( $refhNetwork->{'Type'} eq 'bridge' ) {
+    if ( $refhNetwork->{'Type'} eq $szType ) {
       push(@arNetworkNameList, $refhNetwork->{'Name'});
     }
   }
   return(\@arNetworkNameList);
 }
 
+# -----------------------------------------------------------------
+# ---------------
+sub GetListOfBridgeNetworkNames {
+  my $xmlTree = shift;
+
+  my @arNetworkNameList = GetListOfNetworkNamesForGivenType($xmlTree, 'bridge');
+
+  return(@arNetworkNameList);
+}
+
 # Create a common function wich is common and has a second parm of 'type'
 
 # -----------------------------------------------------------------
 # ---------------
+sub GetListOfInternalNetworks {
+  my $xmlTree = shift;
 
-#GetListOfInternalNetworks
+  my @arNetworkNameList = GetListOfNetworkNamesForGivenType($xmlTree, 'network');
+
+  return(@arNetworkNameList);
+}
+
+# -----------------------------------------------------------------
+# ---------------
 
 # This ends the perl module/package definition.
 1;
