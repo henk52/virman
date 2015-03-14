@@ -1,0 +1,16 @@
+<xml>
+<VIRMAN_INSTANCE_CONFIGURAITON Version="0.1.0">
+  <Description>Monitor machine</Description>
+  <BaseDomainName>rhel63_x86_64</BaseDomainName>
+  <NameOfAdminUserAccount>vagrant</NameOfAdminUserAccount>
+  <InstanceType>t2.micro</InstanceType>
+  <VNic Index="0">
+    <NetworkName>default</NetworkName>
+    <AutoAssignement>dhcp</AutoAssignement>
+  </VNic>
+  <VNic Index="1">
+    <NetworkName>configuration</NetworkName>
+    <AutoAssignement>dhcp</AutoAssignement>
+  </VNic>
+</VIRMAN_INSTANCE_CONFIGURAITON>
+</xml>

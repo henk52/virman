@@ -1,4 +1,4 @@
-package ConfiguredNetworks;
+package InstanceConfiguration;
 use strict;
 
 ################################################################################
@@ -7,13 +7,24 @@ use strict;
 #
 ################################################################################
 #
-#
 #----------------------------------- PURPOSE ------------------------------------
 #
-# This module will provide the perl interface to the 
-#   /etc/virman/configured_networks.xml
+# This module will 
 #
 #----------------------------------- SYNOPSIS -----------------------------------
+#    CAUTIONS:
+#
+#    ASSUMPTIONS/PRECONDITIONS:
+#        
+#    POSTCONDITIONS:
+#
+#    PARAMETER DESCRIPTION:
+#        Input:
+#
+#                                    
+#        Return value:
+#            none
+#           
 #
 #--------------------------- GLOBAL DATA DESCRIPTION ----------------------------
 #---------------------------- PROJECT SPECIFIC DATA -----------------------------
@@ -37,9 +48,12 @@ $VERSION = 0.1.0;
 # List the functions and var's that must be available.
 # If you want to create a global var, create it as 'our'
 @EXPORT = qw(
-                &CfgNetsLoadXml
-                &GetListOfBridgeNetworkNames
-                &GetListOfInternalNetworks
+                &GetBaseDomainName
+                &GetDescription
+                &GetInstanceType
+                &GetNameOfAdminUserAccount
+                &GetNetworkHash
+                &InstCfgLoadXml
             );
 
 
@@ -54,9 +68,53 @@ $VERSION = 0.1.0;
 # ==============================================================================
 
 # -----------------------------------------------------------------
-# Load the XML file given and return the XmlStructure.
 # ---------------
-sub CfgNetsLoadXml {
+sub GetBaseDomainName {
+  my $xmlTree = shift;
+
+  # TODO Barf if XML tree is undef, or not an XML?
+
+  return($xmlTree->{'BaseDomainName'}[0]);
+}
+
+# -----------------------------------------------------------------
+# ---------------
+sub GetDescription {
+  my $xmlTree = shift;
+
+  # TODO Barf if XML tree is undef, or not an XML?
+
+  return($xmlTree->{'Description'}[0]);
+}
+
+# -----------------------------------------------------------------
+# ---------------
+sub GetInstanceType {
+  my $xmlTree = shift;
+
+  # TODO Barf if XML tree is undef, or not an XML?
+
+  return($xmlTree->{'InstanceType'}[0]);
+}
+
+# -----------------------------------------------------------------
+# ---------------
+sub GetNameOfAdminUserAccount {
+  my $xmlTree = shift;
+
+  # TODO Barf if XML tree is undef, or not an XML?
+
+  return($xmlTree->{'NameOfAdminUserAccount'}[0]);
+}
+
+# -----------------------------------------------------------------
+# ---------------
+sub GetNetworkHash {
+}
+
+# ----------------------------------------------------------------
+# ---------------
+sub InstCfgLoadXml {
   my $szFileName = shift;
 
   if ( ! -f $szFileName ) {
@@ -66,53 +124,19 @@ sub CfgNetsLoadXml {
 
   my $xmlTree = XMLin($szFileName, ForceArray => 1);
 
-  my $xmlSubTree = $xmlTree->{'VIRMAN_CONFIGURED_NETWORK'}[0];
-  #print Dumper($xmlSubTree);
+  my $xmlSubTree;
+
+  if ( exists($xmlTree->{'VIRMAN_INSTANCE_CONFIGURAITON'}) ) {
+    $xmlSubTree = $xmlTree->{'VIRMAN_INSTANCE_CONFIGURAITON'}[0];
+  } else {
+    print Dumper($xmlSubTree);
+    die("!!! XML file: $szFileName not of the expectd: 'VIRMAN_INSTANCE_CONFIGURAITON'");
+  }
 
   return($xmlSubTree);
+
 }
 
-# -----------------------------------------------------------------
-# ---------------
-sub GetListOfNetworkNamesForGivenType {
-  my $xmlTree = shift;
-  my $szType  = shift;
-
-  my @arNetworkNameList;
-
-  foreach my $refhNetwork (@{$xmlTree->{'Network'}}) {
-    #print Dumper($refhNetwork);
-    if ( $refhNetwork->{'Type'} eq $szType ) {
-      push(@arNetworkNameList, $refhNetwork->{'Name'});
-    }
-  }
-  return(\@arNetworkNameList);
-}
-
-# -----------------------------------------------------------------
-# ---------------
-sub GetListOfBridgeNetworkNames {
-  my $xmlTree = shift;
-
-  my @arNetworkNameList = GetListOfNetworkNamesForGivenType($xmlTree, 'bridge');
-
-  return(@arNetworkNameList);
-}
-
-# Create a common function wich is common and has a second parm of 'type'
-
-# -----------------------------------------------------------------
-# ---------------
-sub GetListOfInternalNetworks {
-  my $xmlTree = shift;
-
-  my @arNetworkNameList = GetListOfNetworkNamesForGivenType($xmlTree, 'network');
-
-  return(@arNetworkNameList);
-}
-
-# -----------------------------------------------------------------
-# ---------------
 
 # This ends the perl module/package definition.
 1;
