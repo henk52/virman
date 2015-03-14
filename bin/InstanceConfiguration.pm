@@ -110,6 +110,21 @@ sub GetNameOfAdminUserAccount {
 # -----------------------------------------------------------------
 # ---------------
 sub GetNetworkHash {
+  my $xmlTree = shift;
+  
+  my %hNetworks;
+
+  #print Dumper($xmlTree->{'VNic'});
+  foreach my $hrefVNic (@{$xmlTree->{'VNic'}}) {
+    #print Dumper($hrefVNic);
+    my $szNetworkName = @{$hrefVNic->{'NetworkName'}}[0];
+    $hNetworks{$szNetworkName}{'Index'} = $hrefVNic->{'Index'};
+    if ( exists($hrefVNic->{'AutoAssignement'}) ) {
+      $hNetworks{$szNetworkName}{'AutoAssignement'} = @{$hrefVNic->{'AutoAssignement'}}[0];
+    }
+    #print "Name: $szNetworkName\n";
+  }
+  return(\%hNetworks);
 }
 
 # ----------------------------------------------------------------

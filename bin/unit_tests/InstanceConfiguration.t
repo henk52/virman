@@ -5,7 +5,7 @@ use Data::Dumper;
 use FindBin;
 
 
-use Test::More tests => 5;
+use Test::More tests => 6;
 
 use InstanceConfiguration;
 
@@ -18,3 +18,17 @@ is(GetDescription($xmlTree), 'Monitor machine', 'GetDescription()');
 is(GetInstanceType($xmlTree), 't2.micro', 'GetInstanceType()');
 is(GetNameOfAdminUserAccount($xmlTree), 'vagrant', 'GetNameOfAdminUserAccount()');
 
+my %ExpectedNetworkConfiguration = (
+     'default' => {
+                    'Index' => 0,
+                    'AutoAssignement' => 'dhcp'
+                  },
+     'configuration' => {
+                    'Index' => 1,
+                    'AutoAssignement' => 'dhcp'
+                  },
+     'internal' => {
+                    'Index' => 2,
+                   }
+   );
+is_deeply(GetNetworkHash($xmlTree), \%ExpectedNetworkConfiguration, 'GetNetworkHash().');
