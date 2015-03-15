@@ -1,4 +1,4 @@
-package InstanceConfiguration;
+package Default;
 use strict;
 
 ################################################################################
@@ -7,9 +7,11 @@ use strict;
 #
 ################################################################################
 #
+#   DATE OF ORIGIN  : 2015-03-15
+#
 #----------------------------------- PURPOSE ------------------------------------
 #
-# This module will 
+# This module will read the VIRMAN default.xml file.
 #
 #----------------------------------- SYNOPSIS -----------------------------------
 #    CAUTIONS:
@@ -48,19 +50,19 @@ $VERSION = 0.1.0;
 # List the functions and var's that must be available.
 # If you want to create a global var, create it as 'our'
 @EXPORT = qw(
-                &GetBaseDomainName
-                &GetDescription
-                &GetInstanceType
-                &GetNameOfAdminUserAccount
-                &GetNetworkHash
-                &InstCfgLoadXml
+                &DefaultGetBaseStoragePath
+                &DefaultGetCloudInitIsoFilesPath
+                &DefaultGetInstallWrapperPath
+                &DefaultGetInstanceCfgBasePath
+                &DefaultGetSshPath
+                &DefaultLoadXml
             );
 
 
 # ==============================================================================
 #                              V A R I A B L E S
 # ==============================================================================
-
+my $f_szXmlTopTagName = 'VIRMAN_CONFIGURATION';
 
 
 # ==============================================================================
@@ -69,67 +71,57 @@ $VERSION = 0.1.0;
 
 # -----------------------------------------------------------------
 # ---------------
-sub GetBaseDomainName {
+sub DefaultGetBaseStoragePath {
   my $xmlTree = shift;
 
   # TODO Barf if XML tree is undef, or not an XML?
 
-  return($xmlTree->{'BaseDomainName'}[0]);
+  return($xmlTree->{'BaseStoragePath'}[0]);
 }
 
 # -----------------------------------------------------------------
 # ---------------
-sub GetDescription {
+sub DefaultGetCloudInitIsoFilesPath {
   my $xmlTree = shift;
 
   # TODO Barf if XML tree is undef, or not an XML?
 
-  return($xmlTree->{'Description'}[0]);
+  return($xmlTree->{'CloudInitIsoFilesPath'}[0]);
 }
 
 # -----------------------------------------------------------------
 # ---------------
-sub GetInstanceType {
+sub DefaultGetInstallWrapperPath {
   my $xmlTree = shift;
 
   # TODO Barf if XML tree is undef, or not an XML?
 
-  return($xmlTree->{'InstanceType'}[0]);
+  return($xmlTree->{'InstallWrapperPath'}[0]);
 }
 
 # -----------------------------------------------------------------
 # ---------------
-sub GetNameOfAdminUserAccount {
+sub DefaultGetInstanceCfgBasePath {
   my $xmlTree = shift;
 
   # TODO Barf if XML tree is undef, or not an XML?
 
-  return($xmlTree->{'NameOfAdminUserAccount'}[0]);
+  return($xmlTree->{'InstanceCfgBasePath'}[0]);
 }
 
 # -----------------------------------------------------------------
 # ---------------
-sub GetNetworkHash {
+sub DefaultGetSshPath {
   my $xmlTree = shift;
-  
-  my %hNetworks;
 
-  #print Dumper($xmlTree->{'VNic'});
-  foreach my $hrefVNic (@{$xmlTree->{'VNic'}}) {
-    #print Dumper($hrefVNic);
-    my $szNetworkName = @{$hrefVNic->{'NetworkName'}}[0];
-    $hNetworks{$szNetworkName}{'Index'} = $hrefVNic->{'Index'};
-    if ( exists($hrefVNic->{'AutoAssignement'}) ) {
-      $hNetworks{$szNetworkName}{'AutoAssignement'} = @{$hrefVNic->{'AutoAssignement'}}[0];
-    }
-    #print "Name: $szNetworkName\n";
-  }
-  return(\%hNetworks);
+  # TODO Barf if XML tree is undef, or not an XML?
+
+  return($xmlTree->{'SshPath'}[0]);
 }
 
-# ----------------------------------------------------------------
+# -----------------------------------------------------------------
 # ---------------
-sub InstCfgLoadXml {
+sub DefaultLoadXml {
   my $szFileName = shift;
 
   if ( ! -f $szFileName ) {
@@ -141,15 +133,14 @@ sub InstCfgLoadXml {
 
   my $xmlSubTree;
 
-  if ( exists($xmlTree->{'VIRMAN_INSTANCE_CONFIGURAITON'}) ) {
-    $xmlSubTree = $xmlTree->{'VIRMAN_INSTANCE_CONFIGURAITON'}[0];
+  if ( exists($xmlTree->{$f_szXmlTopTagName}) ) {
+    $xmlSubTree = $xmlTree->{$f_szXmlTopTagName}[0];
   } else {
     print Dumper($xmlTree);
-    die("!!! XML file: $szFileName not of the expectd: 'VIRMAN_INSTANCE_CONFIGURAITON'");
+    die("!!! XML file: $szFileName not of the expectd: '$f_szXmlTopTagName'");
   }
 
   return($xmlSubTree);
-
 }
 
 
