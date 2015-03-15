@@ -17,6 +17,13 @@ use Sys::Virt;
 use Sys::Virt::Domain;
 use XML::Simple;
 
+
+use ConfiguredNetworks;
+use Default;
+use InstanceConfiguration;
+
+
+
 my %f_hVirmanConfiguration;
 my $f_szVirmanConfigurationFile = "/etc/virman/default.xml";
 
@@ -32,75 +39,88 @@ my $szVirshFilePoolPath = '/virt_images';
 
 my %hMachineConfiguration;
 
-my @arPublicNetworkList = (
-  'virbr0',
-);
-$hMachineConfiguration{'arPublicNetworkList'} = \@arPublicNetworkList;
+# TODO V Read the networks that have been configured to validate the ones
+#         the apps are asking for.
 
-my @arPrivateNetworkList = (
-  'nm',
-  'cont1',
-  'cont2',
-  'zczc',
-);
 
-$hMachineConfiguration{'arPrivateNetworkList'} = \@arPrivateNetworkList;
 
 # ======================================= FUNCTIONS ================================
 # ----------------------------------------------------
+#** @function LoadVirmanConfiguration
+# @brief Will load select values from /etc/virman/defaults.xml and store in the given hashref.
+#
+# This function should be called prior to any other other instance operations,
+#  so that all the base directories are in place.
+#
+# @params refConfHash - Reference to the configuration hash. Will be updated witht he values.
+# @params szFileName - the name of the defaults.xml file.
+#*
 # ----------------------------------------------------
 sub LoadVirmanConfiguration {
   my $refConfHash = shift;
   my $szFileName = shift;
 
   # TODO verify the XML file exists.
-  my $config = XMLin($szFileName);
+  my $xmlTree = DefaultLoadXml($szFileName);
   
-  $refConfHash->{'BaseStoragePath'}   = $config->{'BaseStoragePath'};
-  $refConfHash->{'RolesRelativePath'} = $config->{'RolesRelativePath'};
-  $refConfHash->{'SshRelativePath'}   = $config->{'SshRelativePath'};
-  $refConfHash->{'CloudInitIsoFiles'} = $config->{'CloudInitIsoFiles'};
+  
+  $refConfHash->{'BaseStoragePath'}     = DefaultGetBaseStoragePath($xmlTree);
+  $refConfHash->{'InstallWrapperPath'}  = DefaultGetInstallWrapperPath($xmlTree);
+  $refConfHash->{'SshPath'}             = DefaultGetSshPath($xmlTree);
+  $refConfHash->{'CloudInitIsoFiles'}   = DefaultGetCloudInitIsoFilesPath($xmlTree);
+  $refConfHash->{'InstanceCfgBasePath'} =  DefaultGetInstanceCfgBasePath($xmlTree);
 
-  #print Dumper($config);
+  #print Dumper($refConfHash);
   #die("!!! test end.");
 }
 
+
 # ----------------------------------------------------
+#** @function ReadInstanceConfiguration
+# @brief 
+#
+# @params refConfHash - The hash where the values are added to.
+# @parmas szFileName - name of the XML file that contains the Instance configuration.
+#*  
 # ----------------------------------------------------
-sub ReadRoleConfiguration {
+sub ReadInstanceConfiguration {
   my $refConfHash = shift;
   my $szFileName = shift;
 
   # TODO verify the XML file exists.
-  my $config = XMLin($szFileName, ForceArray => 1);
+  my $xmlTree = InstCfgLoadXml($szFileName);
+
+  my @arBridgeTypeNetworkList;
+  my @arPrivateNetworkTypeNetworkList;
+
+  $hMachineConfiguration{'arPublicNetworkList'} = \@arBridgeTypeNetworkList;
+  $hMachineConfiguration{'arPrivateNetworkList'} = \@arPrivateNetworkTypeNetworkList;
   
-  if ( exists($config->{'NameOfAdminUserAccount'}) ) {
-    $refConfHash->{'NameOfAdminUserAccount'}   = ${$config->{'NameOfAdminUserAccount'}}[0];
-  }
+  $refConfHash->{'Description'} = GetDescription($xmlTree);
+  $refConfHash->{'BaseDomainName'} = GetBaseDomainName($xmlTree);
+  $refConfHash->{'NameOfAdminUserAccount'}   = GetNameOfAdminUserAccount($xmlTree);
 
-  if ( exists($config->{'BaseDomainName'}) ) {
-    $refConfHash->{'BaseDomainName'}   = ${$config->{'BaseDomainName'}}[0];
-  }
+  # TODO V only read it if it is defined?
+  $refConfHash->{'InstallWrapper'} = InstCfgGetInstallWrapper($xmlTree);
 
-  if ( exists($config->{'RunCommand'}) ) {
-    my @arRunCommand   = $config->{'RunCommand'};
-    #$refConfHash->{'RunCommand'} = \@arRunCommand;
-    $refConfHash->{'RunCommand'} = $config->{'RunCommand'};
-  }
-  if ( exists($config->{'FileProvidedDuringCloudInit'}) ) {
-    my @arFileEntries;
-    foreach my $refFileEntry (@{$config->{'FileProvidedDuringCloudInit'}}) {
-      my %hFileEntry;
-      $hFileEntry{'SourceFile'}      = ${$refFileEntry->{'SourceFile'}}[0];
-      $hFileEntry{'SourceType'}      = ${$refFileEntry->{'SourceType'}}[0];
-      # TODO C Also support !!binary
-      $hFileEntry{'DestinationFile'} = ${$refFileEntry->{'DestinationFile'}}[0];
-      push(@arFileEntries, \%hFileEntry);
-    }
-    $refConfHash->{'FileProvidedDuringCloudInit'}   = \@arFileEntries;
-  }
+  #print Dumper($xmlTree);
+  my %hNetworkConfiguration = InstCfgGetNetworkHash($xmlTree);
 
-  #print Dumper($refConfHash);
+  #print Dumper(\%hNetworkConfiguration);
+
+  $refConfHash->{'NetworkConfiguration'} = \%hNetworkConfiguration;
+
+  # TODO C Also provide funcitons: GetBaseDomainNameIfAvailable, where it is:
+  # GetBaseDomainNameIfAvailable($xmlTree, $refConfHash->{'BaseDomainName'});
+  # where the hash ref will be set if the data is available. Can I do it like this or would it have to be:
+  # GetBaseDomainNameIfAvailable($xmlTree, $refConfHash, 'BaseDomainName');
+
+  #die("!!! TODO read the network info as well.");
+  #Remember to also generate the global.yaml file.
+
+  # Get the file for installation.
+  # TODO C Get the run commands.
+  print Dumper($refConfHash);
   #print Dumper($config);
 
   #print "DDD $refConfHash->{'NameOfAdminUserAccount'}\n";
@@ -206,6 +226,7 @@ sub SetMachineConfiguration {
 
   # TODO title and description should be retrieved from the role.xml file.
   $hMachineConfiguration{'szGuestTitle'} = "Virtual $szDomainName";
+  # TODO V Take the description from the Instance conf description.
   $hMachineConfiguration{'szGuestDescription'} = "Virtual $szDomainName.";
  
   # The amount of memory allocate to the Guest in KiB.
@@ -232,25 +253,30 @@ my $szDomainName = shift || die("!!! You must provide a role name.");
 # TODO Support list the supported roles.
 # TODO Support manual instance number?
 
-
 LoadVirmanConfiguration(\%f_hVirmanConfiguration, $f_szVirmanConfigurationFile);
 
-if ( ! -f "$f_hVirmanConfiguration{'RolesRelativePath'}/${szDomainName}.xml" ) {
+my $szXmlConfigurationFilename = "$f_hVirmanConfiguration{'InstanceCfgBasePath'}/${szDomainName}/${szDomainName}.xml";
+
+if ( ! -f "$szXmlConfigurationFilename" ) {
   die("!!! Domain name '$szDomainName' does not have a role.xml file in $f_hVirmanConfiguration{'RolesRelativePath'}");
 }
 
 SetMachineConfiguration(\%hMachineConfiguration, \%f_hVirmanConfiguration, $szDomainName);
 
-my %hRoleConfiguration;
-ReadRoleConfiguration(\%hRoleConfiguration, "$f_hVirmanConfiguration{'RolesRelativePath'}/${szDomainName}.xml");
+my %hInstanceConfiguration;
+ReadInstanceConfiguration(\%hInstanceConfiguration, $szXmlConfigurationFilename);
 
+# TODO C Read the InstallWrapper is given.
+# ReadInsatllWrapper
 
-GenerateCloudInitIsoImage(\%hRoleConfiguration, \%f_hVirmanConfiguration, $hMachineConfiguration{'szGuestName'}, $f_szInstanceNumber);
+# TODO C Merge the InstallWrapper hash and the instance configuration.
+
+GenerateCloudInitIsoImage(\%hInstanceConfiguration, \%f_hVirmanConfiguration, $hMachineConfiguration{'szGuestName'}, $f_szInstanceNumber);
 
 
 my $uri = 'qemu:///system';
 my $vmm = Sys::Virt->new(uri => $uri);
-my $dom = $vmm->get_domain_by_name($hRoleConfiguration{'BaseDomainName'});
+my $dom = $vmm->get_domain_by_name($hInstanceConfiguration{'BaseDomainName'});
 my $flags=0;
 my $xml = $dom->get_xml_description($flags);
 my  $ref = XMLin($xml);
@@ -268,19 +294,22 @@ my $template = Text::Template->new(TYPE => 'FILE', SOURCE => "$szTemplateFile")
 
 my $szResult = $template->fill_in(HASH => \%hMachineConfiguration);
 # print $szResult ;
+
+# TODO C Somewhere fill in the network list.
  
 Log("III Writing: $hMachineConfiguration{'szGasBaseDirectory'}/$hMachineConfiguration{'szGuestName'}.xml");
 open (OUTPUT_TEMPLATE, ">$hMachineConfiguration{'szGasBaseDirectory'}/$hMachineConfiguration{'szGuestName'}.xml") || die("!!! failed to open file for write: $hMachineConfiguration{'szGasBaseDirectory'}/$hMachineConfiguration{'szGuestName'}.xml - $!");
 print OUTPUT_TEMPLATE "$szResult";
 close(OUTPUT_TEMPLATE);
 
+die("!!! Template written, see name above.");
 
 # TODO Also support LVM.
 if ( $hMachineConfiguration{'szGuestDriverType'} eq 'qcow2' ) {
   # TODO Get the driver to make sure it is a 'qcow2'.
   my $szBackingFileQcow2 = $ref->{'devices'}{'disk'}{'source'}{'file'};
 
-  Log("III Cloning  image from $hRoleConfiguration{'BaseDomainName'} for use by $hMachineConfiguration{'szGuestName'} to $hMachineConfiguration{'szGuestStorageDevice'}");
+  Log("III Cloning  image from $hInstanceConfiguration{'BaseDomainName'} for use by $hMachineConfiguration{'szGuestName'} to $hMachineConfiguration{'szGuestStorageDevice'}");
   DieIfExecuteFails("qemu-img create -f qcow2 -o backing_file=$szBackingFileQcow2 $hMachineConfiguration{'szGuestStorageDevice'}");
 
   #Log("III Cloning $hRoleConfiguration{'BaseDomainName'} for use by $hMachineConfiguration{'szGuestName'} to $hMachineConfiguration{'szGuestStorageDevice'}");

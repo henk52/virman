@@ -5,7 +5,7 @@ use Data::Dumper;
 use FindBin;
 
 
-use Test::More tests => 6;
+use Test::More tests => 7;
 
 use InstanceConfiguration;
 
@@ -31,4 +31,7 @@ my %ExpectedNetworkConfiguration = (
                     'Index' => 2,
                    }
    );
-is_deeply(GetNetworkHash($xmlTree), \%ExpectedNetworkConfiguration, 'GetNetworkHash().');
+my %hActualNetworkConfiguration = InstCfgGetNetworkHash($xmlTree);
+is_deeply(\%hActualNetworkConfiguration, \%ExpectedNetworkConfiguration, 'GetNetworkHash().');
+
+is(InstCfgGetInstallWrapper($xmlTree), 'ripwrap', 'InstCfgGetInstallWrapper()');

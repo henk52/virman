@@ -9,7 +9,7 @@ use strict;
 #
 #----------------------------------- PURPOSE ------------------------------------
 #
-# This module will 
+# This module will interface to VIRMAN_INSTANCE_CONFIGURAITON.
 #
 #----------------------------------- SYNOPSIS -----------------------------------
 #    CAUTIONS:
@@ -52,7 +52,10 @@ $VERSION = 0.1.0;
                 &GetDescription
                 &GetInstanceType
                 &GetNameOfAdminUserAccount
-                &GetNetworkHash
+                &InstCfgGetFileProvidedDuringCloudInit
+                &InstCfgGetInstallWrapper
+                &InstCfgGetNetworkHash
+                &InstCfgGetRunCommandsList
                 &InstCfgLoadXml
             );
 
@@ -107,9 +110,31 @@ sub GetNameOfAdminUserAccount {
   return($xmlTree->{'NameOfAdminUserAccount'}[0]);
 }
 
+# TODO Move this to a common pm so that InstallWrapper could also use it.
+sub InstCfgGetFileProvidedDuringCloudInit {
+
+  my %hConfig;
+  my $config = \%hConfig;
+  # TODO V This could be made common so it could be read both from the app.xml and the OTHER.xml
+  if ( exists($config->{'FileProvidedDuringCloudInit'}) ) {
+    my @arFileEntries;
+    foreach my $refFileEntry (@{$config->{'FileProvidedDuringCloudInit'}}) {
+      my %hFileEntry;
+      $hFileEntry{'SourceFile'}      = ${$refFileEntry->{'SourceFile'}}[0];
+      $hFileEntry{'SourceType'}      = ${$refFileEntry->{'SourceType'}}[0];
+      # TODO C Also support !!binary
+      $hFileEntry{'DestinationFile'} = ${$refFileEntry->{'DestinationFile'}}[0];
+      push(@arFileEntries, \%hFileEntry);
+    }
+#    $refConfHash->{'FileProvidedDuringCloudInit'}   = \@arFileEntries;
+  }
+
+}
+
+
 # -----------------------------------------------------------------
 # ---------------
-sub GetNetworkHash {
+sub InstCfgGetNetworkHash {
   my $xmlTree = shift;
   
   my %hNetworks;
@@ -124,8 +149,35 @@ sub GetNetworkHash {
     }
     #print "Name: $szNetworkName\n";
   }
-  return(\%hNetworks);
+
+  #print Dumper(\%hNetworks);
+  return(%hNetworks);
 }
+
+# -----------------------------------------------------------------
+# ---------------
+sub InstCfgGetInstallWrapper {
+  my $xmlTree = shift;
+
+  # TODO Barf if XML tree is undef, or not an XML?
+
+  return($xmlTree->{'InstallWrapper'}[0]);
+}
+
+# ----------------------------------------------------------------
+# ---------------
+# TODO Move this to a common pm so that InstallWrapper could also use it.
+sub InstCfgGetRunCommandsList {
+  my $config;
+  if ( exists($config->{'RunCommand'}) ) {
+    my @arRunCommand   = $config->{'RunCommand'};
+    #$refConfHash->{'RunCommand'} = \@arRunCommand;
+#    $refConfHash->{'RunCommand'} = $config->{'RunCommand'};
+  }
+
+}
+
+
 
 # ----------------------------------------------------------------
 # ---------------

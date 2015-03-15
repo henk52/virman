@@ -15,5 +15,6 @@
   <VNic Index="2">
     <NetworkName>internal</NetworkName>
   </VNic>
+  <InstallWrapper>ripwrap</InstallWrapper>
 </VIRMAN_INSTANCE_CONFIGURAITON>
 </xml>
