@@ -36,7 +36,7 @@ my $szTemplatePath = "$FindBin::RealBin/../templates";
 my $szFilesPath = "$FindBin::RealBin/../files";
 
 # TODO C put this in a protected directory.
-my $f_szGeneralContainerKeyFile = "/etc/bilby_rsa";
+my $f_szGeneralContainerKeyFile;
 
 my $szVirshFilePoolPath = '/virt_images';
 
@@ -150,7 +150,7 @@ sub GenerateCloudInitIsoImage {
   print METADATA "local-hostname: $szDomainName-$szInstanceNumber\n";
   close(METADATA);
 
-  ${f_szGeneralContainerKeyFile} = "$f_hVirmanConfiguration{'SshRelativePath'}/bilby";
+  ${f_szGeneralContainerKeyFile} = "$f_hVirmanConfiguration{'SshRelativePath'}/virman";
   if ( ! -f  "${f_szGeneralContainerKeyFile}.pub" ) {
     DieIfExecuteFails("ssh-keygen -f ${f_szGeneralContainerKeyFile} -t rsa -N \"\"");
   }
