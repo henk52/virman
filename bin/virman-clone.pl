@@ -8,10 +8,13 @@ use strict;
 # Steps:
 #  Generate the machine definition in /opt/gas/
 
+use FindBin;
+BEGIN{
+	  push( @INC, "$FindBin::RealBin" );    ## Path to local modules
+}
 
 use Data::Dumper;
 use Text::Template;
-use FindBin;
 use ExecuteAndTrace;
 use Sys::Virt;
 use Sys::Virt::Domain;
@@ -37,7 +40,7 @@ my $f_szGeneralContainerKeyFile = "/etc/bilby_rsa";
 
 my $szVirshFilePoolPath = '/virt_images';
 
-my %hMachineConfiguration;
+my %f_hMachineConfiguration;
 
 # TODO V Read the networks that have been configured to validate the ones
 #         the apps are asking for.
@@ -90,12 +93,6 @@ sub ReadInstanceConfiguration {
   # TODO verify the XML file exists.
   my $xmlTree = InstCfgLoadXml($szFileName);
 
-  my @arBridgeTypeNetworkList;
-  my @arPrivateNetworkTypeNetworkList;
-
-  $hMachineConfiguration{'arPublicNetworkList'} = \@arBridgeTypeNetworkList;
-  $hMachineConfiguration{'arPrivateNetworkList'} = \@arPrivateNetworkTypeNetworkList;
-  
   $refConfHash->{'Description'} = GetDescription($xmlTree);
   $refConfHash->{'BaseDomainName'} = GetBaseDomainName($xmlTree);
   $refConfHash->{'NameOfAdminUserAccount'}   = GetNameOfAdminUserAccount($xmlTree);
@@ -110,7 +107,7 @@ sub ReadInstanceConfiguration {
 
   $refConfHash->{'NetworkConfiguration'} = \%hNetworkConfiguration;
 
-  # TODO C Also provide funcitons: GetBaseDomainNameIfAvailable, where it is:
+  # TODO C Also provide functions: GetBaseDomainNameIfAvailable, where it is:
   # GetBaseDomainNameIfAvailable($xmlTree, $refConfHash->{'BaseDomainName'});
   # where the hash ref will be set if the data is available. Can I do it like this or would it have to be:
   # GetBaseDomainNameIfAvailable($xmlTree, $refConfHash, 'BaseDomainName');
@@ -128,6 +125,11 @@ sub ReadInstanceConfiguration {
 }
 
 # ----------------------------------------------------
+# This functions genrates the ISO file used by cloud-init
+#  The two files: 
+#     - meta-data
+#     - user-data
+#
 # See: http://www.projectatomic.io/blog/2014/10/getting-started-with-cloud-init/
 # ------------------
 sub GenerateCloudInitIsoImage {
@@ -206,41 +208,66 @@ sub GenerateCloudInitIsoImage {
   print USERDATA "\n";
   close(USERDATA);
 
-  Log("III Generate ISO image: $hMachineConfiguration{'szIsoImage'}");
-  DieIfExecuteFails("genisoimage -output $hMachineConfiguration{'szIsoImage'} -volid cidata -joliet -rock user-data meta-data");
+  Log("III Generate ISO image: $f_hMachineConfiguration{'szIsoImage'}");
+  DieIfExecuteFails("genisoimage -output $f_hMachineConfiguration{'szIsoImage'} -volid cidata -joliet -rock user-data meta-data");
   #die("!!! testing exit.");
 }
 
 
 # ----------------------------------------------------
+# This function populates the $refhMachineConfiguration, which is used for
+#   filling in the domain.xml file, in the template file.
+#
+# @params $refhMachineConfiguration - reference to the hash that will be given to the domain.xml text texmplate.
+# @params $refhVirmanConfiguration - The virman /etc/virman/defaults.xml.
+# @params $refhInstanceConfiguration - The instance configuration.
+#    TODO V Later merge this inst-conf with the install_wrapper file.
 # ----------------------------------------------------
 sub SetMachineConfiguration {
   my $refhMachineConfiguration = shift;
   my $refhVirmanConfiguration = shift;
+  my $refhInstanceConfiguration = shift;
   my $szDomainName = shift;
 
-  $hMachineConfiguration{'szGuestName'} = $szDomainName;
+  $refhMachineConfiguration->{'szGuestName'} = $szDomainName;
 
 # TODO C Support a dir for the instance machine dom.xml files.
-  $hMachineConfiguration{'szGasBaseDirectory'} = '/opt/gas';
+  $refhMachineConfiguration->{'szGasBaseDirectory'} = '/opt/gas';
 
   # TODO title and description should be retrieved from the role.xml file.
-  $hMachineConfiguration{'szGuestTitle'} = "Virtual $szDomainName";
+  $refhMachineConfiguration->{'szGuestTitle'} = "Virtual $szDomainName";
   # TODO V Take the description from the Instance conf description.
-  $hMachineConfiguration{'szGuestDescription'} = "Virtual $szDomainName.";
+  if ( exists($refhInstanceConfiguration->{'Description'}) ) {
+  	$refhMachineConfiguration->{'szGuestDescription'} = $refhInstanceConfiguration->{'Description'};
+  } else {
+  	$refhMachineConfiguration->{'szGuestDescription'} = "Virtual $szDomainName.";  	
+  }
  
   # The amount of memory allocate to the Guest in KiB.
-  $hMachineConfiguration{'szGuestMemory'} = '786432';
+  $refhMachineConfiguration->{'szGuestMemory'} = '786432';
 
   # file: cqow2
-  $hMachineConfiguration{'szGuestDiskType'} = 'file';
+  $refhMachineConfiguration->{'szGuestDiskType'} = 'file';
 
-  $hMachineConfiguration{'szGuestDriverType'} = 'qcow2';
+  $refhMachineConfiguration->{'szGuestDriverType'} = 'qcow2';
 
-  $hMachineConfiguration{'szGuestDiskSourceTypeName'} = 'file';
-  $hMachineConfiguration{'szGuestStorageDevice'} = "${szVirshFilePoolPath}/$hMachineConfiguration{'szGuestName'}.qcow2";
+  $refhMachineConfiguration->{'szGuestDiskSourceTypeName'} = 'file';
+  $refhMachineConfiguration->{'szGuestStorageDevice'} = "${szVirshFilePoolPath}/$refhMachineConfiguration->{'szGuestName'}.qcow2";
   # TODO V put this in a proctected subdir.
-  $hMachineConfiguration{'szIsoImage'} = "$refhVirmanConfiguration->{'CloudInitIsoFiles'}/$hMachineConfiguration{'szGuestName'}${f_szInstanceNumber}-cidata.iso";
+  $refhMachineConfiguration->{'szIsoImage'} = "$refhVirmanConfiguration->{'CloudInitIsoFiles'}/$refhMachineConfiguration->{'szGuestName'}${f_szInstanceNumber}-cidata.iso";
+  
+  # The Network list.
+  # Sort the sub hash: NetworkConfiguration
+  my @arBridgeTypeNetworkList;
+  my @arPrivateNetworkTypeNetworkList;
+  
+  foreach my $refNetwork ( sort keys $refhMachineConfiguration->{'NetworkConfiguration'} ) {
+  	# TODO V Later figure out if the refNetwork goes into the bridge or the network list. 
+  	push(@arPrivateNetworkTypeNetworkList, $refNetwork->{'Name'});
+  }
+
+  $f_hMachineConfiguration{'arPublicNetworkList'} = \@arBridgeTypeNetworkList;
+  $f_hMachineConfiguration{'arPrivateNetworkList'} = \@arPrivateNetworkTypeNetworkList;
 
 }
 
@@ -261,17 +288,18 @@ if ( ! -f "$szXmlConfigurationFilename" ) {
   die("!!! Domain name '$szDomainName' does not have a role.xml file in $f_hVirmanConfiguration{'RolesRelativePath'}");
 }
 
-SetMachineConfiguration(\%hMachineConfiguration, \%f_hVirmanConfiguration, $szDomainName);
-
 my %hInstanceConfiguration;
 ReadInstanceConfiguration(\%hInstanceConfiguration, $szXmlConfigurationFilename);
+
+SetMachineConfiguration(\%f_hMachineConfiguration, \%f_hVirmanConfiguration, \%hInstanceConfiguration, $szDomainName);
+
 
 # TODO C Read the InstallWrapper is given.
 # ReadInsatllWrapper
 
 # TODO C Merge the InstallWrapper hash and the instance configuration.
 
-GenerateCloudInitIsoImage(\%hInstanceConfiguration, \%f_hVirmanConfiguration, $hMachineConfiguration{'szGuestName'}, $f_szInstanceNumber);
+GenerateCloudInitIsoImage(\%hInstanceConfiguration, \%f_hVirmanConfiguration, $f_hMachineConfiguration{'szGuestName'}, $f_szInstanceNumber);
 
 
 my $uri = 'qemu:///system';
@@ -292,32 +320,32 @@ my $template = Text::Template->new(TYPE => 'FILE', SOURCE => "$szTemplateFile")
 #print "DDD template: $template\n";
 #print Dumper($template);
 
-my $szResult = $template->fill_in(HASH => \%hMachineConfiguration);
+my $szResult = $template->fill_in(HASH => \%f_hMachineConfiguration);
 # print $szResult ;
 
 # TODO C Somewhere fill in the network list.
  
-Log("III Writing: $hMachineConfiguration{'szGasBaseDirectory'}/$hMachineConfiguration{'szGuestName'}.xml");
-open (OUTPUT_TEMPLATE, ">$hMachineConfiguration{'szGasBaseDirectory'}/$hMachineConfiguration{'szGuestName'}.xml") || die("!!! failed to open file for write: $hMachineConfiguration{'szGasBaseDirectory'}/$hMachineConfiguration{'szGuestName'}.xml - $!");
+Log("III Writing: $f_hMachineConfiguration{'szGasBaseDirectory'}/$f_hMachineConfiguration{'szGuestName'}.xml");
+open (OUTPUT_TEMPLATE, ">$f_hMachineConfiguration{'szGasBaseDirectory'}/$f_hMachineConfiguration{'szGuestName'}.xml") || die("!!! failed to open file for write: $f_hMachineConfiguration{'szGasBaseDirectory'}/$f_hMachineConfiguration{'szGuestName'}.xml - $!");
 print OUTPUT_TEMPLATE "$szResult";
 close(OUTPUT_TEMPLATE);
 
 die("!!! Template written, see name above.");
 
 # TODO Also support LVM.
-if ( $hMachineConfiguration{'szGuestDriverType'} eq 'qcow2' ) {
+if ( $f_hMachineConfiguration{'szGuestDriverType'} eq 'qcow2' ) {
   # TODO Get the driver to make sure it is a 'qcow2'.
   my $szBackingFileQcow2 = $ref->{'devices'}{'disk'}{'source'}{'file'};
 
-  Log("III Cloning  image from $hInstanceConfiguration{'BaseDomainName'} for use by $hMachineConfiguration{'szGuestName'} to $hMachineConfiguration{'szGuestStorageDevice'}");
-  DieIfExecuteFails("qemu-img create -f qcow2 -o backing_file=$szBackingFileQcow2 $hMachineConfiguration{'szGuestStorageDevice'}");
+  Log("III Cloning  image from $hInstanceConfiguration{'BaseDomainName'} for use by $f_hMachineConfiguration{'szGuestName'} to $f_hMachineConfiguration{'szGuestStorageDevice'}");
+  DieIfExecuteFails("qemu-img create -f qcow2 -o backing_file=$szBackingFileQcow2 $f_hMachineConfiguration{'szGuestStorageDevice'}");
 
   #Log("III Cloning $hRoleConfiguration{'BaseDomainName'} for use by $hMachineConfiguration{'szGuestName'} to $hMachineConfiguration{'szGuestStorageDevice'}");
   #DieIfExecuteFails("virt-clone --connect qemu:///system --original $hRoleConfiguration{'BaseDomainName'} --name $hMachineConfiguration{'szGuestName'} --file $hMachineConfiguration{'szGuestStorageDevice'}");
-  #DieIfExecuteFails("virt-clone --connect qemu:///system --original $f_szFedoraBaseName --name $hMachineConfiguration{'szGuestName'} --file $hMachineConfiguration{'szGuestStorageDevice'}");
+  #DieIfExecuteFails("virt-clone --connect qemu:///system --original $f_szFedoraBaseName --name $hMachineConfiguration{'szGuestName'} --file $f_hMachineConfiguration{'szGuestStorageDevice'}");
 
-  Log("III Create the instance of $hMachineConfiguration{'szGuestName'}");
-  DieIfExecuteFails("virsh define --file $hMachineConfiguration{'szGasBaseDirectory'}/$hMachineConfiguration{'szGuestName'}.xml");
+  Log("III Create the instance of $f_hMachineConfiguration{'szGuestName'}");
+  DieIfExecuteFails("virsh define --file $f_hMachineConfiguration{'szGasBaseDirectory'}/$f_hMachineConfiguration{'szGuestName'}.xml");
 }
 
 # TODO Generate the configuration ISO image.

@@ -42,7 +42,7 @@ use XML::Simple;
 
 
 
-$VERSION = 0.1.0;
+$VERSION = 0.2.0;
 @ISA = ('Exporter');
 
 # List the functions and var's that must be available.
@@ -133,6 +133,7 @@ sub InstCfgGetFileProvidedDuringCloudInit {
 
 
 # -----------------------------------------------------------------
+# Returns the has, keyd by the index, so that it can be easily sorted.
 # ---------------
 sub InstCfgGetNetworkHash {
   my $xmlTree = shift;
@@ -142,10 +143,10 @@ sub InstCfgGetNetworkHash {
   #print Dumper($xmlTree->{'VNic'});
   foreach my $hrefVNic (@{$xmlTree->{'VNic'}}) {
     #print Dumper($hrefVNic);
-    my $szNetworkName = @{$hrefVNic->{'NetworkName'}}[0];
-    $hNetworks{$szNetworkName}{'Index'} = $hrefVNic->{'Index'};
+    my $szKey = $hrefVNic->{'Index'};
+    $hNetworks{$szKey}{'Name'} = @{$hrefVNic->{'NetworkName'}}[0];
     if ( exists($hrefVNic->{'AutoAssignement'}) ) {
-      $hNetworks{$szNetworkName}{'AutoAssignement'} = @{$hrefVNic->{'AutoAssignement'}}[0];
+      $hNetworks{$szKey}{'AutoAssignement'} = @{$hrefVNic->{'AutoAssignement'}}[0];
     }
     #print "Name: $szNetworkName\n";
   }

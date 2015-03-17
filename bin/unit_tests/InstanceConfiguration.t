@@ -4,7 +4,9 @@ use strict;
 use Data::Dumper;
 use FindBin;
 
-
+BEGIN{
+	  push( @INC, "$FindBin::RealBin",  "$FindBin::RealBin/..");    ## Path to local modules
+}
 use Test::More tests => 7;
 
 use InstanceConfiguration;
@@ -19,16 +21,16 @@ is(GetInstanceType($xmlTree), 't2.micro', 'GetInstanceType()');
 is(GetNameOfAdminUserAccount($xmlTree), 'vagrant', 'GetNameOfAdminUserAccount()');
 
 my %ExpectedNetworkConfiguration = (
-     'default' => {
-                    'Index' => 0,
+     '0' => {
+                    'Name' => 'default',
                     'AutoAssignement' => 'dhcp'
                   },
-     'configuration' => {
-                    'Index' => 1,
+     '1' => {
+                    'Name' => 'configuration',
                     'AutoAssignement' => 'dhcp'
                   },
-     'internal' => {
-                    'Index' => 2,
+     '2' => {
+                    'Name' => 'internal',
                    }
    );
 my %hActualNetworkConfiguration = InstCfgGetNetworkHash($xmlTree);
