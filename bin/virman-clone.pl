@@ -117,7 +117,8 @@ sub ReadInstanceConfiguration {
 
   # Get the file for installation.
   # TODO C Get the run commands.
-  print Dumper($refConfHash);
+  #print Dumper($refConfHash);
+  #print "------------------------------------\n";
   #print Dumper($config);
 
   #print "DDD $refConfHash->{'NameOfAdminUserAccount'}\n";
@@ -261,14 +262,19 @@ sub SetMachineConfiguration {
   my @arBridgeTypeNetworkList;
   my @arPrivateNetworkTypeNetworkList;
   
-  foreach my $refNetwork ( sort keys $refhMachineConfiguration->{'NetworkConfiguration'} ) {
+  #print Dumper(%{$refhInstanceConfiguration->{'NetworkConfiguration'}});
+  #foreach my $refNetwork ( sort keys %{$refhInstanceConfiguration->{'NetworkConfiguration'}} ) {
+  foreach my $refNetwork ( sort keys $refhInstanceConfiguration->{'NetworkConfiguration'} ) {
   	# TODO V Later figure out if the refNetwork goes into the bridge or the network list. 
-  	push(@arPrivateNetworkTypeNetworkList, $refNetwork->{'Name'});
+        print "---\n";
+  	push(@arPrivateNetworkTypeNetworkList, $refhInstanceConfiguration->{'NetworkConfiguration'}{$refNetwork}{'Name'});
   }
 
-  $f_hMachineConfiguration{'arPublicNetworkList'} = \@arBridgeTypeNetworkList;
-  $f_hMachineConfiguration{'arPrivateNetworkList'} = \@arPrivateNetworkTypeNetworkList;
+  $refhMachineConfiguration->{'arPublicNetworkList'} = \@arBridgeTypeNetworkList;
+  $refhMachineConfiguration->{'arPrivateNetworkList'} = \@arPrivateNetworkTypeNetworkList;
 
+  #print Dumper($refhMachineConfiguration);
+  #die("!!! TEST END.");
 }
 
 
