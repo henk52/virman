@@ -336,7 +336,7 @@ open (OUTPUT_TEMPLATE, ">$f_hMachineConfiguration{'szGasBaseDirectory'}/$f_hMach
 print OUTPUT_TEMPLATE "$szResult";
 close(OUTPUT_TEMPLATE);
 
-die("!!! Template written, see name above.");
+#die("!!! Template written, see name above.");
 
 # TODO Also support LVM.
 if ( $f_hMachineConfiguration{'szGuestDriverType'} eq 'qcow2' ) {
