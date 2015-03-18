@@ -8,6 +8,9 @@ my @arTestFiles = qw(
   unit_tests/ConfiguredNetworks.t
   unit_tests/InstanceConfiguration.t
   unit_tests/Default.t
+  unit_tests/InfoGather.t
+  unit_tests/InfoProcessing.t
+  unit_tests/InfoExecute.t
                   );
 
 runtests(@arTestFiles);

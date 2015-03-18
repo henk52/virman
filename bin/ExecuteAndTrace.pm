@@ -24,6 +24,14 @@ my $f_szDataDirectory = "/var/log";
 my $f_szLogFileName = "virman.log";
 
 # -----------------------------------------------------------------
+#** @function [public|protected|private] [return-type] function-name (parameters)
+# @brief A brief description of the function
+#
+# A detailed description of the function
+# @params value [required|optional] [details]
+# @retval value [details]
+# ....
+#*
 # ---------------
 sub DieIfExecuteFails {
   my $szCmd = shift;
@@ -37,12 +45,31 @@ sub DieIfExecuteFails {
   }
 } # end DieIfExecuteFails
 
-
+# -----------------------------------------------------------------
+#** @function private GetTimeStamp
+# @brief A brief description of the function
+#
+# A detailed description of the function
+# @params value [required|optional] [details]
+# @retval value [details]
+# ....
+#*
+# ---------------
 sub GetTimeStamp {
   return( strftime("%Y%m%d%H%M", localtime(time)) );
 }
  
  
+# -----------------------------------------------------------------
+#** @function public log
+# @brief A brief description of the function
+#
+# A detailed description of the function
+# @params value [required|optional] [details]
+# @retval value [details]
+# ....
+#*
+# ---------------
 sub Log {
   my $szLogMessage = shift;
   my $szTimeStamp = GetTimeStamp();
@@ -50,7 +77,17 @@ sub Log {
   `echo "$szTimeStamp:$szLogMessage" >> $f_szDataDirectory/$f_szLogFileName`;
   print "$szTimeStamp:$szLogMessage\n";
 }
- 
+
+# -----------------------------------------------------------------
+#** @function [public|protected|private] [return-type] function-name (parameters)
+# @brief A brief description of the function
+#
+# A detailed description of the function
+# @params value [required|optional] [details]
+# @retval value [details]
+# ....
+#*
+# ---------------
 sub LogOnly {
   my $szLogMessage = shift;
   my $szTimeStamp = GetTimeStamp();

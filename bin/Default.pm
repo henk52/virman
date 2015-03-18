@@ -44,7 +44,7 @@ use XML::Simple;
 
 
 
-$VERSION = 0.1.0;
+$VERSION = 0.2.0;
 @ISA = ('Exporter');
 
 # List the functions and var's that must be available.
@@ -54,6 +54,7 @@ $VERSION = 0.1.0;
                 &DefaultGetCloudInitIsoFilesPath
                 &DefaultGetInstallWrapperPath
                 &DefaultGetInstanceCfgBasePath
+                &DefaultGetQcowFilePoolPath
                 &DefaultGetSshPath
                 &DefaultLoadXml
             );
@@ -107,6 +108,24 @@ sub DefaultGetInstanceCfgBasePath {
   # TODO Barf if XML tree is undef, or not an XML?
 
   return($xmlTree->{'InstanceCfgBasePath'}[0]);
+}
+
+# -----------------------------------------------------------------
+#** @function [public|protected|private] [return-type] function-name (parameters)
+# @brief A brief description of the function
+#
+# A detailed description of the function
+# @params value [required|optional] [details]
+# @retval value [details]
+# ....
+#*
+# ---------------
+sub DefaultGetQcowFilePoolPath {
+   my $xmlTree = shift;
+
+  # TODO Barf if XML tree is undef, or not an XML?
+
+  return($xmlTree->{'QcowFilePoolPath'}[0]);
 }
 
 # -----------------------------------------------------------------

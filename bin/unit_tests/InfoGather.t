@@ -7,7 +7,7 @@ use strict;
 #
 ################################################################################
 #
-#   DATE OF ORIGIN  : 2015-03-15
+#   DATE OF ORIGIN  : Mar 18, 2015
 #
 #----------------------------------- PURPOSE ------------------------------------
 #
@@ -19,16 +19,16 @@ use strict;
 use FindBin;
 
 BEGIN {
-  push( @INC, "$FindBin::RealBin/.." );    ## Path to local modules
+  push( @INC, "$FindBin::RealBin/..:$FindBin::RealBin" );    ## Path to local modules
 }
 
 use Data::Dumper;
 
-use Test::More tests => 7;
+use Test::More tests => 2;
 #use Test::Exception;
 
 # TODO C 'use' the perl module that is to be tested.
-use Default;
+use InfoGather;
 
 
 # ==============================================================================
@@ -43,15 +43,13 @@ use Default;
 
 # -----------------------------------------------------------------
 # ---------------
+my %hVirmanConfiguration;
 
-my $xmlTree = DefaultLoadXml("$FindBin::RealBin/example_default.xml");
-is($xmlTree->{'Version'}, '0.3.0', 'Was able to read the xml file.');
+IGLoadVirmanConfiguration(\%hVirmanConfiguration, "unit_tests/example_default.xml");
+is($hVirmanConfiguration{'InstallWrapperPath'}, '/var/virman/install_wrappers', 'Validating IGLoadVirmanConfiguration()');
 
-is(DefaultGetBaseStoragePath($xmlTree),       '/var/virman/basestorage',      'DefaultGetBaseStoragePath()');
-is(DefaultGetCloudInitIsoFilesPath($xmlTree), '/var/virman/cloud_init_iso_files', 'DefaultGetCloudInitIsoFilesPath()');
-is(DefaultGetInstallWrapperPath($xmlTree),    '/var/virman/install_wrappers', 'DefaultGetInstallWrapperPath()');
-is(DefaultGetInstanceCfgBasePath($xmlTree),   '/var/virman/instanceconfigs',  'DefaultGetInstanceCfgBasePath()');
-is(DefaultGetSshPath($xmlTree),               '/var/virman/.ssh',             'DefaultGetSshPath()');
-is(DefaultGetQcowFilePoolPath($xmlTree),      '/virt_images',                 'DefaultGetQcowFilePoolPath()');
 
+my %hInstanceConfiguration;
+IGReadInstanceConfiguration(\%hInstanceConfiguration, 'unit_tests/example_InstanceConfiguration.xml');
+is($hInstanceConfiguration{'InstallWrapper'}, 'ripwrap', 'Sample validation of IGReadInstanceConfiguration()');
 

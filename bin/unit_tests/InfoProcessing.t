@@ -7,7 +7,7 @@ use strict;
 #
 ################################################################################
 #
-#   DATE OF ORIGIN  : 2015-03-15
+#   DATE OF ORIGIN  : Mar 18, 2015
 #
 #----------------------------------- PURPOSE ------------------------------------
 #
@@ -19,16 +19,16 @@ use strict;
 use FindBin;
 
 BEGIN {
-  push( @INC, "$FindBin::RealBin/.." );    ## Path to local modules
+  push( @INC, "$FindBin::RealBin:$FindBin::RealBin/.." );    ## Path to local modules
 }
 
 use Data::Dumper;
 
-use Test::More tests => 7;
+use Test::More tests => 1;
 #use Test::Exception;
 
 # TODO C 'use' the perl module that is to be tested.
-use Default;
+use InfoProcessing;
 
 
 # ==============================================================================
@@ -43,15 +43,24 @@ use Default;
 
 # -----------------------------------------------------------------
 # ---------------
+my $f_szInstanceDescription = 'Instance Description';
+my %hInstanceConfiguration = (
+              'Description' => "$f_szInstanceDescription",
+              'NetworkConfiguration' => {
+                       '0' => { 'Name' => 'Net0Name'  }
+                                        }
+                             );
+my %hVirmanConfiguration = (
+               'CloudInitIsoFiles' => '/ISO_FILES',
+               'QcowFilePoolPath'  => '/virt_images'
+                           );
+my %hMachineConfiguration;
+IPSetMachineConfiguration(\%hMachineConfiguration, \%hVirmanConfiguration, \%hInstanceConfiguration, 'MY_NAME', '009');
 
-my $xmlTree = DefaultLoadXml("$FindBin::RealBin/example_default.xml");
-is($xmlTree->{'Version'}, '0.3.0', 'Was able to read the xml file.');
+is($hMachineConfiguration{'szGuestDescription'}, $f_szInstanceDescription, 'IPSetMachineConfiguration[szGuestDescription]')
 
-is(DefaultGetBaseStoragePath($xmlTree),       '/var/virman/basestorage',      'DefaultGetBaseStoragePath()');
-is(DefaultGetCloudInitIsoFilesPath($xmlTree), '/var/virman/cloud_init_iso_files', 'DefaultGetCloudInitIsoFilesPath()');
-is(DefaultGetInstallWrapperPath($xmlTree),    '/var/virman/install_wrappers', 'DefaultGetInstallWrapperPath()');
-is(DefaultGetInstanceCfgBasePath($xmlTree),   '/var/virman/instanceconfigs',  'DefaultGetInstanceCfgBasePath()');
-is(DefaultGetSshPath($xmlTree),               '/var/virman/.ssh',             'DefaultGetSshPath()');
-is(DefaultGetQcowFilePoolPath($xmlTree),      '/virt_images',                 'DefaultGetQcowFilePoolPath()');
+# TODO C Also test these:
+# 'szGuestName' => 'MY_NAME'
+# 'arPrivateNetworkList' => [ 'Net0Name'                                    ],
 
 
