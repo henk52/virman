@@ -117,6 +117,11 @@ sub IEGenerateCloudInitIsoImage {
 
   my $szDomainName = $refhMachineConfiguration->{'szGuestName'};
 
+  if ( ! exists($refhVirmanConfiguration->{'SshPath'}) ) {
+    print Dumper($refhVirmanConfiguration);
+    confess("!!! Missing the definition of 'SshPath' in the %VirmanConfiguration");
+  }
+
   Log("III write: meta-data");
 
 # TODO V Write these files to a unique subdirectory so that multiple operations can be done in parallel.
@@ -213,12 +218,17 @@ sub IEGenerateCloudInitIsoImage {
 # ---------------
 sub IECreateInstance {
   my $refhCombinedInstanceAndWrapperConf = shift;
-  my $hVirmanConfiguration               = shift;
+  my $refhVirmanConfiguration               = shift;
   my $refhMachineConfiguration           = shift;
   my $szTemplatePath                     = shift;
   my $szBackingFileQcow2                 = shift;
 
   # TODO V verify the template exists: $szTemplatePath
+
+  if ( ! exists($refhVirmanConfiguration->{'CloudInitIsoFiles'}) ) {
+    print Dumper($refhVirmanConfiguration);
+    confess("!!! Missing the definition of 'CloudInitIsoFiles' in the %VirmanConfiguration");
+  }
 
   my $szTemplateFile = "$szTemplatePath/domain_xml.tmpl";
 
@@ -233,7 +243,8 @@ sub IECreateInstance {
 
   # TODO C Somewhere fill in the network list.
 
-  my $szGuestXmlFile = "$hVirmanConfiguration->{'CloudInitIsoFiles'}/$refhMachineConfiguration->{'szGuestName'}.xml";
+  
+  my $szGuestXmlFile = "$refhVirmanConfiguration->{'CloudInitIsoFiles'}/$refhMachineConfiguration->{'szGuestName'}.xml";
   Log("III Writing: $szGuestXmlFile");
   open( OUTPUT_TEMPLATE,">$szGuestXmlFile")  || die("!!! failed to open file for write: $szGuestXmlFile - $!");
   print OUTPUT_TEMPLATE "$szResult";

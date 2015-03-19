@@ -61,16 +61,21 @@ my %hMachineConfiguration = (
                      'szGuestDriverType' => 'qcow2'
                             );
 my %hVirmanConfiguration = (
-                     'SshRelativePath' => '.'
+                     'SshPath' => '.',
+                     'CloudInitIsoFiles' => '.'
                            );
 my $szInstanceNumber = '008';
+
+my $szSshPubFile = "$hVirmanConfiguration{'SshPath'}/virman.pub";
+`touch $szSshPubFile`;
+
 my $nStatus = IEGenerateCloudInitIsoImage(\%hCombinedInstanceAndWrapperConf, \%hVirmanConfiguration, \%hMachineConfiguration, $szInstanceNumber);
 is($nStatus, 0, 'superficial test of IEGenerateCloudInitIsoImage()');
 
 my $szBackingFileQcow2 = "backing.qcow2";
 my $szTemplatePath = "$FindBin::RealBin/../../templates";
 
-$nStatus = IECreateInstance(\%hCombinedInstanceAndWrapperConf, \%hMachineConfiguration, $szTemplatePath, $szBackingFileQcow2);
+$nStatus = IECreateInstance(\%hCombinedInstanceAndWrapperConf, \%hVirmanConfiguration, \%hMachineConfiguration, $szTemplatePath, $szBackingFileQcow2);
 is($nStatus, 0, 'superficial test of IECreateInstance()');
 
 # TODO V Make sure the 'domain'.xml is good.
@@ -82,4 +87,6 @@ unlink("user-data");
 unlink("meta-data");
 
 unlink("$hMachineConfiguration{'szGuestName'}.xml");
+
+unlink("$szSshPubFile");
 

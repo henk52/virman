@@ -1,0 +1,19 @@
+<xml>
+<INSTALL_WRAPPER Version="0.1.0">
+  <Note></Note>
+  <VNic Index="-1">
+    <NetworkName>configuration</NetworkName>
+    <AutoAssignement>dhcp</AutoAssignement>
+    <IpAddress></IpAddress>
+    <NetMask></NetMask>
+    <Gateway></Gateway>
+  </VNic>
+  <FileProvidedDuringCloudInit Name="global.yaml">
+    <SourceFile>/var/virman/vrouter/global.yaml</SourceFile>
+    <SourceType></SourceType>
+    <DestinationFile>/etc/puppet/data/global.yaml</DestinationFile>
+  </FileProvidedDuringCloudInit>
+  <PreAppRunCommand></PreAppRunCommand>
+  <PostAppRunCommand></PostAppRunCommand>
+</INSTALL_WRAPPER>
+</xml>

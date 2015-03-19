@@ -11,6 +11,7 @@ my @arTestFiles = qw(
   unit_tests/InfoGather.t
   unit_tests/InfoProcessing.t
   unit_tests/InfoExecute.t
+  unit_tests/InstallWrapper.t
                   );
 
 runtests(@arTestFiles);

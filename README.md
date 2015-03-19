@@ -2,6 +2,10 @@
 Virtual machine manager, a virsh wrapper in PERL.
 
 TODO Read the install wrapper, if the app references one.
+  - GetVNics
+  - GetFileProvided
+  - GetPreAppRunCommand
+  - GeTPostAppRunCommand
 TODO Merge the data from the install wrapper with the Instance data
   - e.g. the run commands, file commands and network.
   - index of -1, -2 etc indicates the order they are appended to the network list.
