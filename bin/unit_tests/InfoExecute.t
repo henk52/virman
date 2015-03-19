@@ -19,13 +19,16 @@ use strict;
 use FindBin;
 
 BEGIN {
-  push( @INC, "$FindBin::RealBin:$FindBin::RealBin/.." );    ## Path to local modules
+  unshift( @INC, "$FindBin::RealBin/unit_tests", "$FindBin::RealBin", "$FindBin::RealBin/.." );    ## Path to local modules
 }
 
 use Data::Dumper;
 
 use Test::More tests => 1;
 #use Test::Exception;
+
+# In the hopes that it will use my unit_test version.
+#use ExecuteAndTrace;
 
 # TODO C 'use' the perl module that is to be tested.
 use InfoExecute;
@@ -43,14 +46,31 @@ use InfoExecute;
 
 # -----------------------------------------------------------------
 # ---------------
+
+
+
 my %hCombinedInstanceAndWrapperConf = (
+                     'BaseDomainName' => 'base'
                        
                                       );
 my %hMachineConfiguration = (
                      'szGuestName' => 'GUEST_NAME',
-                     'szIsoImage'  => 'test.iso'
+                     'szIsoImage'  => 'test.iso',
+                     'szGuestStorageDevice' => 'guest_device',
+                     'szGasBaseDirectory' => '.',
+                     'szGuestDriverType' => 'qcow2'
                             );
 my %hVirmanConfiguration = (
                      'SshRelativePath' => '.'
                            );
-IEGenerateCloudInitIsoImage(\%hCombinedInstanceAndWrapperConf, );
+my $szInstanceNumber = '008';
+my $nStatus = IEGenerateCloudInitIsoImage(\%hCombinedInstanceAndWrapperConf, \%hVirmanConfiguration, \%hMachineConfiguration, $szInstanceNumber);
+is($nStatus, 0, 'superficial test of IEGenerateCloudInitIsoImage()');
+
+my $szBackingFileQcow2 = "backing.qcow2";
+unlink("virman.pub");
+unlink("virman");
+unlink("test.iso");
+unlink("user-data");
+unlink("meta-data");
+

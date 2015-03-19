@@ -107,7 +107,7 @@ sub IEGenerateCloudInitIsoImage {
   # TODO N Barf on missing data.
   # TODO V Barf on IDs already in use.
 
-  my %hCombinedInstanceAndWrapperConf = %{$refCombinedInstanceAndWrapperConf};
+  my %hCombinedInstanceAndWrapperConf = %{$refhCombinedInstanceAndWrapperConf};
 
   my $szDomainName = $refhMachineConfiguration->{'szGuestName'};
 
@@ -191,6 +191,8 @@ sub IEGenerateCloudInitIsoImage {
   );
 
   #die("!!! testing exit.");
+  # Returning 0 since we did not die.
+  return(0);
 }
 
 # -----------------------------------------------------------------
@@ -205,7 +207,9 @@ sub IEGenerateCloudInitIsoImage {
 # ---------------
 sub IECreateInstance {
   my $refhMachineConfiguration = shift;
+  my $refhCombinedInstanceAndWrapperConf = shift;
   my $szTemplatePath           = shift;
+  my $szBackingFileQcow2       = shift;
 
   # TODO V verify the template exists: $szTemplatePath
 
@@ -223,38 +227,25 @@ sub IECreateInstance {
 
   # TODO C Somewhere fill in the network list.
 
-  Log(
-"III Writing: $f_hMachineConfiguration{'szGasBaseDirectory'}/$f_hMachineConfiguration{'szGuestName'}.xml"
-  );
-  open( OUTPUT_TEMPLATE,
-">$f_hMachineConfiguration{'szGasBaseDirectory'}/$f_hMachineConfiguration{'szGuestName'}.xml"
-    )
-    || die(
-"!!! failed to open file for write: $f_hMachineConfiguration{'szGasBaseDirectory'}/$f_hMachineConfiguration{'szGuestName'}.xml - $!"
-    );
+  Log("III Writing: $refhMachineConfiguration->{'szGasBaseDirectory'}/$refhMachineConfiguration->{'szGuestName'}.xml");
+  open( OUTPUT_TEMPLATE,">$refhMachineConfiguration->{'szGasBaseDirectory'}/$refhMachineConfiguration->{'szGuestName'}.xml")  || die("!!! failed to open file for write: $refhMachineConfiguration->{'szGasBaseDirectory'}/$refhMachineConfiguration->{'szGuestName'}.xml - $!");
   print OUTPUT_TEMPLATE "$szResult";
   close(OUTPUT_TEMPLATE);
 
   #die("!!! Template written, see name above.");
 
   # TODO Also support LVM.
-  if ( $f_hMachineConfiguration{'szGuestDriverType'} eq 'qcow2' ) {
+  if ( $refhMachineConfiguration->{'szGuestDriverType'} eq 'qcow2' ) {
 
-    Log(
-"III Cloning  image from $hInstanceConfiguration{'BaseDomainName'} for use by $f_hMachineConfiguration{'szGuestName'} to $f_hMachineConfiguration{'szGuestStorageDevice'}"
-    );
-    DieIfExecuteFails(
-"qemu-img create -f qcow2 -o backing_file=$szBackingFileQcow2 $f_hMachineConfiguration{'szGuestStorageDevice'}"
-    );
+    Log("III Cloning  image from $refhCombinedInstanceAndWrapperConf->{'BaseDomainName'} for use by $refhMachineConfiguration->{'szGuestName'} to $refhMachineConfiguration->{'szGuestStorageDevice'}");
+    DieIfExecuteFails("qemu-img create -f qcow2 -o backing_file=$szBackingFileQcow2 $refhMachineConfiguration->{'szGuestStorageDevice'}");
 
 #Log("III Cloning $hRoleConfiguration{'BaseDomainName'} for use by $hMachineConfiguration{'szGuestName'} to $hMachineConfiguration{'szGuestStorageDevice'}");
 #DieIfExecuteFails("virt-clone --connect qemu:///system --original $hRoleConfiguration{'BaseDomainName'} --name $hMachineConfiguration{'szGuestName'} --file $hMachineConfiguration{'szGuestStorageDevice'}");
 #DieIfExecuteFails("virt-clone --connect qemu:///system --original $f_szFedoraBaseName --name $hMachineConfiguration{'szGuestName'} --file $f_hMachineConfiguration{'szGuestStorageDevice'}");
 
-    Log("III Create the instance of $f_hMachineConfiguration{'szGuestName'}");
-    DieIfExecuteFails(
-"virsh define --file $f_hMachineConfiguration{'szGasBaseDirectory'}/$f_hMachineConfiguration{'szGuestName'}.xml"
-    );
+    Log("III Create the instance of $refhMachineConfiguration->{'szGuestName'}");
+    DieIfExecuteFails("virsh define --file $refhMachineConfiguration->{'szGasBaseDirectory'}/$refhMachineConfiguration->{'szGuestName'}.xml");
   }
 
 # TODO Generate the configuration ISO image.
