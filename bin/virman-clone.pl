@@ -74,7 +74,7 @@ if ( ! -f "$szXmlConfigurationFilename" ) {
 my %hInstanceConfiguration;
 IGReadInstanceConfiguration(\%hInstanceConfiguration, $szXmlConfigurationFilename);
 
-SetMachineConfiguration(\%f_hMachineConfiguration, \%f_hVirmanConfiguration, \%hInstanceConfiguration, $szDomainName);
+IPSetMachineConfiguration(\%f_hMachineConfiguration, \%f_hVirmanConfiguration, \%hInstanceConfiguration, $szDomainName, $f_szInstanceNumber);
 
 
 # TODO C Read the InstallWrapper is given.
@@ -83,10 +83,10 @@ SetMachineConfiguration(\%f_hMachineConfiguration, \%f_hVirmanConfiguration, \%h
 # TODO C Merge the InstallWrapper hash and the instance configuration.
 
 # TODO Return the path to the domain xml file.
-GenerateCloudInitIsoImage(\%hInstanceConfiguration, \%f_hVirmanConfiguration, \%f_hMachineConfiguration, $f_szInstanceNumber);
+IEGenerateCloudInitIsoImage(\%hInstanceConfiguration, \%f_hVirmanConfiguration, \%f_hMachineConfiguration, $f_szInstanceNumber);
 
 my $szBackingFileQcow2 = IEGetBackingFile(\%hInstanceConfiguration);
 
-IECreateInstance();
+IECreateInstance(\%hInstanceConfiguration, \%f_hMachineConfiguration, $szTemplatePath, $szBackingFileQcow2);
 
 Log("III Done.\n");
