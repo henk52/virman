@@ -19,7 +19,7 @@ use strict;
 use FindBin;
 
 BEGIN {
-  push( @INC, "$FindBin::RealBin:$FindBin::RealBin/.." );    ## Path to local modules
+  push( @INC, "$FindBin::RealBin", "$FindBin::RealBin/.." );    ## Path to local modules
 }
 
 use Data::Dumper;

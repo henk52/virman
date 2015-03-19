@@ -17,10 +17,7 @@ BEGIN{
 }
 
 use Data::Dumper;
-use Text::Template;
 use ExecuteAndTrace;
-use Sys::Virt;
-use Sys::Virt::Domain;
 use XML::Simple;
 
 

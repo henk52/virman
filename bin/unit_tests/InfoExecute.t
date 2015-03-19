@@ -24,7 +24,7 @@ BEGIN {
 
 use Data::Dumper;
 
-use Test::More tests => 1;
+use Test::More tests => 2;
 #use Test::Exception;
 
 # In the hopes that it will use my unit_test version.
@@ -68,9 +68,18 @@ my $nStatus = IEGenerateCloudInitIsoImage(\%hCombinedInstanceAndWrapperConf, \%h
 is($nStatus, 0, 'superficial test of IEGenerateCloudInitIsoImage()');
 
 my $szBackingFileQcow2 = "backing.qcow2";
+my $szTemplatePath = "$FindBin::RealBin/../../templates";
+
+$nStatus = IECreateInstance(\%hCombinedInstanceAndWrapperConf, \%hMachineConfiguration, $szTemplatePath, $szBackingFileQcow2);
+is($nStatus, 0, 'superficial test of IECreateInstance()');
+
+# TODO V Make sure the 'domain'.xml is good.
+
 unlink("virman.pub");
 unlink("virman");
 unlink("test.iso");
 unlink("user-data");
 unlink("meta-data");
+
+unlink("$hMachineConfiguration{'szGuestName'}.xml");
 

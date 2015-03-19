@@ -42,6 +42,10 @@ use vars qw(@ISA @EXPORT $VERSION);
 use Exporter;
 use Carp;
 use Data::Dumper;
+use Sys::Virt;
+use Sys::Virt::Domain;
+use Text::Template;
+
 use ExecuteAndTrace;
 
 $VERSION = 0.1.0;
@@ -124,7 +128,7 @@ sub IEGenerateCloudInitIsoImage {
   if ( !-f "${szGeneralContainerKeyFile}.pub" ) {
     DieIfExecuteFails("ssh-keygen -f ${szGeneralContainerKeyFile} -t rsa -N \"\"");
   }
-
+  
   my $szSshPublicKey = `cat ${szGeneralContainerKeyFile}.pub`;
   chomp($szSshPublicKey);
 
@@ -206,14 +210,13 @@ sub IEGenerateCloudInitIsoImage {
 #*
 # ---------------
 sub IECreateInstance {
-  my $refhMachineConfiguration = shift;
   my $refhCombinedInstanceAndWrapperConf = shift;
-  my $szTemplatePath           = shift;
-  my $szBackingFileQcow2       = shift;
+  my $refhMachineConfiguration           = shift;
+  my $szTemplatePath                     = shift;
+  my $szBackingFileQcow2                 = shift;
 
   # TODO V verify the template exists: $szTemplatePath
 
-  print "---------------------\n";
   my $szTemplateFile = "$szTemplatePath/domain_xml.tmpl";
 
   my $template =
@@ -240,17 +243,18 @@ sub IECreateInstance {
     Log("III Cloning  image from $refhCombinedInstanceAndWrapperConf->{'BaseDomainName'} for use by $refhMachineConfiguration->{'szGuestName'} to $refhMachineConfiguration->{'szGuestStorageDevice'}");
     DieIfExecuteFails("qemu-img create -f qcow2 -o backing_file=$szBackingFileQcow2 $refhMachineConfiguration->{'szGuestStorageDevice'}");
 
-#Log("III Cloning $hRoleConfiguration{'BaseDomainName'} for use by $hMachineConfiguration{'szGuestName'} to $hMachineConfiguration{'szGuestStorageDevice'}");
-#DieIfExecuteFails("virt-clone --connect qemu:///system --original $hRoleConfiguration{'BaseDomainName'} --name $hMachineConfiguration{'szGuestName'} --file $hMachineConfiguration{'szGuestStorageDevice'}");
-#DieIfExecuteFails("virt-clone --connect qemu:///system --original $f_szFedoraBaseName --name $hMachineConfiguration{'szGuestName'} --file $f_hMachineConfiguration{'szGuestStorageDevice'}");
+    #Log("III Cloning $hRoleConfiguration{'BaseDomainName'} for use by $hMachineConfiguration{'szGuestName'} to $hMachineConfiguration{'szGuestStorageDevice'}");
+    #DieIfExecuteFails("virt-clone --connect qemu:///system --original $hRoleConfiguration{'BaseDomainName'} --name $hMachineConfiguration{'szGuestName'} --file $hMachineConfiguration{'szGuestStorageDevice'}");
+    #DieIfExecuteFails("virt-clone --connect qemu:///system --original $f_szFedoraBaseName --name $hMachineConfiguration{'szGuestName'} --file $f_hMachineConfiguration{'szGuestStorageDevice'}");
 
     Log("III Create the instance of $refhMachineConfiguration->{'szGuestName'}");
+    # TODO V change to use the Sys::Virt::Domain
     DieIfExecuteFails("virsh define --file $refhMachineConfiguration->{'szGasBaseDirectory'}/$refhMachineConfiguration->{'szGuestName'}.xml");
   }
 
-# TODO Generate the configuration ISO image.
-# Provide the image to the container, or should that be part of the XML generation?
-
+  # TODO Generate the configuration ISO image.
+  # Provide the image to the container, or should that be part of the XML generation?
+  return(0);
 }
 
 # This ends the perl module/package definition.
