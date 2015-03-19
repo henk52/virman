@@ -18,13 +18,13 @@ BEGIN{
 
 use Data::Dumper;
 use ExecuteAndTrace;
-use XML::Simple;
 
 
 use ConfiguredNetworks;
 use Default;
 use InstanceConfiguration;
 use InfoGather;
+use InfoProcessing;
 use InfoExecute;
 
 
@@ -87,6 +87,6 @@ IEGenerateCloudInitIsoImage(\%hInstanceConfiguration, \%f_hVirmanConfiguration, 
 
 my $szBackingFileQcow2 = IEGetBackingFile(\%hInstanceConfiguration);
 
-IECreateInstance(\%hInstanceConfiguration, \%f_hMachineConfiguration, $szTemplatePath, $szBackingFileQcow2);
+IECreateInstance(\%hInstanceConfiguration, \%f_hVirmanConfiguration, \%f_hMachineConfiguration, $szTemplatePath, $szBackingFileQcow2);
 
 Log("III Done.\n");

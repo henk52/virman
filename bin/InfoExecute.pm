@@ -45,6 +45,8 @@ use Data::Dumper;
 use Sys::Virt;
 use Sys::Virt::Domain;
 use Text::Template;
+use XML::Simple;
+
 
 use ExecuteAndTrace;
 
@@ -124,7 +126,7 @@ sub IEGenerateCloudInitIsoImage {
   print METADATA "local-hostname: $szDomainName-$szInstanceNumber\n";
   close(METADATA);
 
-  my $szGeneralContainerKeyFile = "$refhVirmanConfiguration->{'SshRelativePath'}/virman";
+  my $szGeneralContainerKeyFile = "$refhVirmanConfiguration->{'SshPath'}/virman";
   if ( !-f "${szGeneralContainerKeyFile}.pub" ) {
     DieIfExecuteFails("ssh-keygen -f ${szGeneralContainerKeyFile} -t rsa -N \"\"");
   }
@@ -211,6 +213,7 @@ sub IEGenerateCloudInitIsoImage {
 # ---------------
 sub IECreateInstance {
   my $refhCombinedInstanceAndWrapperConf = shift;
+  my $hVirmanConfiguration               = shift;
   my $refhMachineConfiguration           = shift;
   my $szTemplatePath                     = shift;
   my $szBackingFileQcow2                 = shift;
@@ -230,8 +233,9 @@ sub IECreateInstance {
 
   # TODO C Somewhere fill in the network list.
 
-  Log("III Writing: $refhMachineConfiguration->{'szGasBaseDirectory'}/$refhMachineConfiguration->{'szGuestName'}.xml");
-  open( OUTPUT_TEMPLATE,">$refhMachineConfiguration->{'szGasBaseDirectory'}/$refhMachineConfiguration->{'szGuestName'}.xml")  || die("!!! failed to open file for write: $refhMachineConfiguration->{'szGasBaseDirectory'}/$refhMachineConfiguration->{'szGuestName'}.xml - $!");
+  my $szGuestXmlFile = "$hVirmanConfiguration->{'CloudInitIsoFiles'}/$refhMachineConfiguration->{'szGuestName'}.xml";
+  Log("III Writing: $szGuestXmlFile");
+  open( OUTPUT_TEMPLATE,">$szGuestXmlFile")  || die("!!! failed to open file for write: $szGuestXmlFile - $!");
   print OUTPUT_TEMPLATE "$szResult";
   close(OUTPUT_TEMPLATE);
 
@@ -249,7 +253,7 @@ sub IECreateInstance {
 
     Log("III Create the instance of $refhMachineConfiguration->{'szGuestName'}");
     # TODO V change to use the Sys::Virt::Domain
-    DieIfExecuteFails("virsh define --file $refhMachineConfiguration->{'szGasBaseDirectory'}/$refhMachineConfiguration->{'szGuestName'}.xml");
+    DieIfExecuteFails("virsh define --file $szGuestXmlFile");
   }
 
   # TODO Generate the configuration ISO image.
