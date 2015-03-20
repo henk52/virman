@@ -133,7 +133,7 @@ sub InstCfgGetFileProvidedDuringCloudInit {
 
 
 # -----------------------------------------------------------------
-# Returns the has, keyd by the index, so that it can be easily sorted.
+# Returns the hash, keyd by the index, so that it can be easily sorted.
 # ---------------
 sub InstCfgGetNetworkHash {
   my $xmlTree = shift;
