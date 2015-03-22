@@ -74,6 +74,13 @@ if ( ! -f "$szXmlConfigurationFilename" ) {
 my %hInstanceConfiguration;
 IGReadInstanceConfiguration(\%hInstanceConfiguration, $szXmlConfigurationFilename);
 
+# If an install wrapper has been defined then use it.
+if ( exists($hInstanceConfiguration{'InstallWrapper'}) && $hInstanceConfiguration{'InstallWrapper'} ne "" ) {
+  my %hInstallWrapperConfiguration;
+  InstWrapLoadInstallWrapperConfiguration(\%hInstallWrapperConfiguration, "$f_hVirmanConfiguration{'InstallWrapperPath'}/$hInstanceConfiguration{'InstallWrapper'}");
+  IPMergeInstanceAndWrapperInfo(\%hInstanceConfiguration, \%hInstallWrapperConfiguration);
+}
+
 IPSetMachineConfiguration(\%f_hMachineConfiguration, \%f_hVirmanConfiguration, \%hInstanceConfiguration, $szDomainName, $f_szInstanceNumber);
 
 
