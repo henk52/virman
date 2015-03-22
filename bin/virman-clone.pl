@@ -88,12 +88,14 @@ if ( exists($hInstanceConfiguration{'InstallWrapper'}) && $hInstanceConfiguratio
   IPMergeInstanceAndWrapperInfo(\%hInstanceConfiguration, \%hInstallWrapperConfiguration);
 }
 
-my $szGlobalYamlFileName = "$f_hVirmanConfiguration{'CloudInitIsoFilesPath'}/${szDomainName}-${f_szInstanceNumber}_global.yaml";
+my $szGlobalYamlFileName = "$f_hVirmanConfiguration{'CloudInitIsoFiles'}/${szDomainName}-${f_szInstanceNumber}_global.yaml";
 unlink($szGlobalYamlFileName);
 
 # TODO add the $szGlobalYamlFileName to the list of files that are included in the cloud-init file transfer.
 
 GYUpdateNetworkCfg($hInstanceConfiguration{'NetworkConfiguration'}, $szGlobalYamlFileName);
+#print "DDD wrote $szGlobalYamlFileName\n";
+#print Dumper(\%f_hVirmanConfiguration);
 
 IPSetMachineConfiguration(\%f_hMachineConfiguration, \%f_hVirmanConfiguration, \%hInstanceConfiguration, $szDomainName, $f_szInstanceNumber);
 
