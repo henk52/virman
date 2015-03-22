@@ -5,4 +5,6 @@ package { 'perl-Sys-Virt': ensure => present }
 package { 'perl-Test-Simple': ensure => present }
 package { 'perl-Text-Template': ensure => present }
 package { 'perl-XML-Simple': ensure => present }
+package { 'perl-YAML-Tiny': ensure => present }
+  # Ubuntu: libyaml-tiny-perl
 
