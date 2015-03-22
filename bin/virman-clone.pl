@@ -27,6 +27,7 @@ use InfoGather;
 use InfoProcessing;
 use InfoExecute;
 use InstallWrapper;
+use GlobalYaml;
 
 
 
@@ -64,6 +65,10 @@ my $szDomainName = shift || die("!!! You must provide a role name.");
 # TODO Support list the supported roles.
 # TODO Support manual instance number?
 
+# %hInstanceConfiguration - The data from the instance.xml file.
+# %f_hVirmanConfiguration - The data from the /etc/virman/default.xml.
+# %f_hMachineConfiguration - the data going into the domain xml file.
+
 IGLoadVirmanConfiguration(\%f_hVirmanConfiguration, $f_szVirmanConfigurationFile);
 
 my $szXmlConfigurationFilename = "$f_hVirmanConfiguration{'InstanceCfgBasePath'}/${szDomainName}/${szDomainName}.xml";
@@ -79,16 +84,19 @@ IGReadInstanceConfiguration(\%hInstanceConfiguration, $szXmlConfigurationFilenam
 if ( exists($hInstanceConfiguration{'InstallWrapper'}) && $hInstanceConfiguration{'InstallWrapper'} ne "" ) {
   my %hInstallWrapperConfiguration;
   InstWrapLoadInstallWrapperConfiguration(\%hInstallWrapperConfiguration, "$f_hVirmanConfiguration{'InstallWrapperPath'}/$hInstanceConfiguration{'InstallWrapper'}.xml");
+  # Merge the InstallWrapper hash and the instance configuration.
   IPMergeInstanceAndWrapperInfo(\%hInstanceConfiguration, \%hInstallWrapperConfiguration);
 }
 
+my $szGlobalYamlFileName = "$f_hVirmanConfiguration{'CloudInitIsoFilesPath'}/${szDomainName}-${f_szInstanceNumber}_global.yaml";
+unlink($szGlobalYamlFileName);
+
+# TODO add the $szGlobalYamlFileName to the list of files that are included in the cloud-init file transfer.
+
+GYUpdateNetworkCfg($hInstanceConfiguration{'NetworkConfiguration'}, $szGlobalYamlFileName);
+
 IPSetMachineConfiguration(\%f_hMachineConfiguration, \%f_hVirmanConfiguration, \%hInstanceConfiguration, $szDomainName, $f_szInstanceNumber);
 
-
-# TODO C Read the InstallWrapper is given.
-# ReadInsatllWrapper
-
-# TODO C Merge the InstallWrapper hash and the instance configuration.
 
 # TODO Return the path to the domain xml file.
 IEGenerateCloudInitIsoImage(\%hInstanceConfiguration, \%f_hVirmanConfiguration, \%f_hMachineConfiguration, $f_szInstanceNumber);
