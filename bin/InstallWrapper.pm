@@ -45,6 +45,8 @@ use Data::Dumper;
 
 use XML::Simple;
 
+use Common;
+
 
 $VERSION = 0.1.0;
 @ISA = ('Exporter');
@@ -53,6 +55,7 @@ $VERSION = 0.1.0;
 # If you want to create a global var, create it as 'our'
 @EXPORT = qw(
                 &InstWrapGetFileHash
+                &InstWrapGetFileProvidedDuringCloudInit
                 &InstWrapGetNote
                 &InstWrapGetPreNetworkHash
                 &InstWrapGetPostNetworkHash
@@ -84,22 +87,10 @@ $VERSION = 0.1.0;
 # ....
 #*
 # ---------------
-sub InstCfgGetFileProvidedDuringCloudInit {
-
-  my %hConfig;
-  my $config = \%hConfig;
-  # TODO V This could be made common so it could be read both from the app.xml and the OTHER.xml
-  if ( exists($config->{'FileProvidedDuringCloudInit'}) ) {
-    my @arFileEntries;
-    foreach my $refFileEntry (@{$config->{'FileProvidedDuringCloudInit'}}) {
-      my %hFileEntry;
-      $hFileEntry{'SourceFile'}      = ${$refFileEntry->{'SourceFile'}}[0];
-      $hFileEntry{'SourceType'}      = ${$refFileEntry->{'SourceType'}}[0];
-      # TODO C Also support !!binary
-      $hFileEntry{'DestinationFile'} = ${$refFileEntry->{'DestinationFile'}}[0];
-      push(@arFileEntries, \%hFileEntry);
-    } # end foreach.
-  } # end if.
+sub InstWrapGetFileProvidedDuringCloudInit {
+  my $xmlTree = shift;
+ 
+  return(CmnGetFileProvidedDuringCloudInit($xmlTree));
 } # end InstCfgGetFileProvidedDuringCloudInit.
 
 # -----------------------------------------------------------------

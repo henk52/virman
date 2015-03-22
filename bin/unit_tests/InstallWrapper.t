@@ -24,7 +24,7 @@ BEGIN {
 
 use Data::Dumper;
 
-use Test::More tests => 6;
+use Test::More tests => 7;
 #use Test::Exception;
 
 # TODO C 'use' the perl module that is to be tested.
@@ -79,3 +79,14 @@ my %ExpectedPostNetworkConfiguration = (
 undef %hActualNetworkConfiguration;
 %hActualNetworkConfiguration = InstWrapGetPostNetworkHash($xmlTree);
 is_deeply(\%hActualNetworkConfiguration, \%ExpectedPostNetworkConfiguration, 'InstWrapGetPostNetworkHash().');
+
+my %hFileHash = InstWrapGetFileProvidedDuringCloudInit($xmlTree);
+
+my %ExpectedFileHash = (
+ '/var/virman/vrouter/global.yaml' => {
+                                               'SourceType' => 'base64',
+                                               'DestinationFile' => '/etc/puppet/data/global.yaml'
+                                             }
+
+);
+is_deeply(\%hFileHash, \%ExpectedFileHash, 'Validating InstWrapGetFileProvidedDuringCloudInit().')

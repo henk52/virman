@@ -111,26 +111,25 @@ sub GetNameOfAdminUserAccount {
   return($xmlTree->{'NameOfAdminUserAccount'}[0]);
 }
 
-# TODO V Merge this with InstWrapGetFileProvidedDuringCloudInit
+
+# -----------------------------------------------------------------
+#** @function [public|protected|private] [return-type] function-name (parameters)
+# @brief A brief description of the function
+#
+# A detailed description of the function
+#
+# @see CmnGetFileProvidedDuringCloudInit
+#
+# @params value [required|optional] [details]
+# @retval value [details]
+# ....
+#*
+# ---------------
 sub InstCfgGetFileProvidedDuringCloudInit {
-
-  my %hConfig;
-  my $config = \%hConfig;
-  # TODO V This could be made common so it could be read both from the app.xml and the OTHER.xml
-  if ( exists($config->{'FileProvidedDuringCloudInit'}) ) {
-    my @arFileEntries;
-    foreach my $refFileEntry (@{$config->{'FileProvidedDuringCloudInit'}}) {
-      my %hFileEntry;
-      $hFileEntry{'SourceFile'}      = ${$refFileEntry->{'SourceFile'}}[0];
-      $hFileEntry{'SourceType'}      = ${$refFileEntry->{'SourceType'}}[0];
-      # TODO C Also support !!binary
-      $hFileEntry{'DestinationFile'} = ${$refFileEntry->{'DestinationFile'}}[0];
-      push(@arFileEntries, \%hFileEntry);
-    }
-#    $refConfHash->{'FileProvidedDuringCloudInit'}   = \@arFileEntries;
-  }
-
-}
+  my $xmlTree = shift;
+ 
+  return(CmnGetFileProvidedDuringCloudInit($xmlTree));
+} # end InstCfgGetFileProvidedDuringCloudInit.
 
 
 # -----------------------------------------------------------------

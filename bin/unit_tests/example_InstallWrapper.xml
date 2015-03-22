@@ -21,7 +21,7 @@
   </VNicPost>
   <FileProvidedDuringCloudInit Name="global.yaml">
     <SourceFile>/var/virman/vrouter/global.yaml</SourceFile>
-    <SourceType></SourceType>
+    <SourceType>base64</SourceType>
     <DestinationFile>/etc/puppet/data/global.yaml</DestinationFile>
   </FileProvidedDuringCloudInit>
   <PreAppRunCommand>pre one</PreAppRunCommand>

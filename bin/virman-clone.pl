@@ -93,9 +93,14 @@ unlink($szGlobalYamlFileName);
 
 # TODO add the $szGlobalYamlFileName to the list of files that are included in the cloud-init file transfer.
 
+# Generate the 'global.yaml' file for the instance.
 GYUpdateNetworkCfg($hInstanceConfiguration{'NetworkConfiguration'}, $szGlobalYamlFileName);
 #print "DDD wrote $szGlobalYamlFileName\n";
 #print Dumper(\%f_hVirmanConfiguration);
+
+# Add the global.yaml to the list of files to include on the iso.
+CmnAddFileEntry($hInstanceConfiguration{'FileProvidedDuringCloudInit'}, $szGlobalYamlFileName, 'Base64', '/etc/puppet/data/global.yaml');
+
 
 IPSetMachineConfiguration(\%f_hMachineConfiguration, \%f_hVirmanConfiguration, \%hInstanceConfiguration, $szDomainName, $f_szInstanceNumber);
 

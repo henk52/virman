@@ -13,6 +13,7 @@ my @arTestFiles = qw(
   unit_tests/InfoExecute.t
   unit_tests/InstallWrapper.t
   unit_tests/GlobalYaml.t
+  unit_tests/Common.t
                   );
 
 runtests(@arTestFiles);
