@@ -22,15 +22,15 @@ is(GetNameOfAdminUserAccount($xmlTree), 'vagrant', 'GetNameOfAdminUserAccount()'
 
 my %ExpectedNetworkConfiguration = (
      '0' => {
-                    'Name' => 'default',
+                    'Name' => 'inst0',
                     'AutoAssignement' => 'dhcp'
                   },
      '1' => {
-                    'Name' => 'configuration',
+                    'Name' => 'inst1',
                     'AutoAssignement' => 'dhcp'
                   },
      '2' => {
-                    'Name' => 'internal',
+                    'Name' => 'inst2',
                    }
    );
 my %hActualNetworkConfiguration = InstCfgGetNetworkHash($xmlTree);

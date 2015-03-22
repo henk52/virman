@@ -5,15 +5,15 @@
   <NameOfAdminUserAccount>vagrant</NameOfAdminUserAccount>
   <InstanceType>t2.micro</InstanceType>
   <VNic Index="0">
-    <NetworkName>default</NetworkName>
+    <NetworkName>inst0</NetworkName>
     <AutoAssignement>dhcp</AutoAssignement>
   </VNic>
   <VNic Index="1">
-    <NetworkName>configuration</NetworkName>
+    <NetworkName>inst1</NetworkName>
     <AutoAssignement>dhcp</AutoAssignement>
   </VNic>
   <VNic Index="2">
-    <NetworkName>internal</NetworkName>
+    <NetworkName>inst2</NetworkName>
   </VNic>
   <InstallWrapper>ripwrap</InstallWrapper>
 </VIRMAN_INSTANCE_CONFIGURAITON>

@@ -1,20 +1,24 @@
 <xml>
 <INSTALL_WRAPPER Version="0.1.0">
   <Note>Just a note.</Note>
-  <VNic Index="-1">
-    <NetworkName>configuration</NetworkName>
+  <VNicPre Index="0">
+    <NetworkName>pre0</NetworkName>
+    <AutoAssignement>dhcp</AutoAssignement>
+  </VNicPre>
+  <VNicPost Index="0">
+    <NetworkName>post0</NetworkName>
     <AutoAssignement>dhcp</AutoAssignement>
     <IpAddress></IpAddress>
     <NetMask></NetMask>
     <Gateway></Gateway>
-  </VNic>
-  <VNic Index="-2">
-    <NetworkName>oplan</NetworkName>
+  </VNicPost>
+  <VNicPost Index="1">
+    <NetworkName>post1</NetworkName>
     <AutoAssignement>dhcp</AutoAssignement>
     <IpAddress></IpAddress>
     <NetMask></NetMask>
     <Gateway></Gateway>
-  </VNic>
+  </VNicPost>
   <FileProvidedDuringCloudInit Name="global.yaml">
     <SourceFile>/var/virman/vrouter/global.yaml</SourceFile>
     <SourceType></SourceType>

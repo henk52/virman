@@ -24,7 +24,7 @@ BEGIN {
 
 use Data::Dumper;
 
-use Test::More tests => 5;
+use Test::More tests => 6;
 #use Test::Exception;
 
 # TODO C 'use' the perl module that is to be tested.
@@ -57,15 +57,25 @@ my @arActualPreRunCmdList = InstWrapGetPreRunCommandList($xmlTree);
 is_deeply(\@arActualPreRunCmdList, \@arExepectedPreRunCmdList, 'InstWrapGetPreRunCommandList()');
 
 
-my %ExpectedNetworkConfiguration = (
-     '-1' => {
-                    'Name' => 'configuration',
-                    'AutoAssignement' => 'dhcp'
-                  },
-     '-2' => {
-                    'Name' => 'oplan',
+my %ExpectedPreNetworkConfiguration = (
+     '0' => {
+                    'Name' => 'pre0',
                     'AutoAssignement' => 'dhcp'
                   }
    );
-my %hActualNetworkConfiguration = InstWrapGetNetworkHash($xmlTree);
-is_deeply(\%hActualNetworkConfiguration, \%ExpectedNetworkConfiguration, 'InstWrapGetNetworkHash().');
+my %hActualNetworkConfiguration = InstWrapGetPreNetworkHash($xmlTree);
+is_deeply(\%hActualNetworkConfiguration, \%ExpectedPreNetworkConfiguration, 'InstWrapGetPreNetworkHash().');
+
+my %ExpectedPostNetworkConfiguration = (
+     '0' => {
+                    'Name' => 'post0',
+                    'AutoAssignement' => 'dhcp'
+                  },
+     '1' => {
+                    'Name' => 'post1',
+                    'AutoAssignement' => 'dhcp'
+                  }
+   );
+undef %hActualNetworkConfiguration;
+%hActualNetworkConfiguration = InstWrapGetPostNetworkHash($xmlTree);
+is_deeply(\%hActualNetworkConfiguration, \%ExpectedPostNetworkConfiguration, 'InstWrapGetPostNetworkHash().');

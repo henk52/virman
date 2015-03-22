@@ -24,11 +24,19 @@ BEGIN {
 
 use Data::Dumper;
 
-use Test::More tests => 1;
+use Test::More tests => 2;
 #use Test::Exception;
 
-# TODO C 'use' the perl module that is to be tested.
+# The module under test.
 use InfoProcessing;
+
+
+# Support modules for testing.
+use InstanceConfiguration;
+use InstallWrapper;
+
+
+
 
 
 # ==============================================================================
@@ -57,10 +65,42 @@ my %hVirmanConfiguration = (
 my %hMachineConfiguration;
 IPSetMachineConfiguration(\%hMachineConfiguration, \%hVirmanConfiguration, \%hInstanceConfiguration, 'MY_NAME', '009');
 
-is($hMachineConfiguration{'szGuestDescription'}, $f_szInstanceDescription, 'IPSetMachineConfiguration[szGuestDescription]')
+is($hMachineConfiguration{'szGuestDescription'}, $f_szInstanceDescription, 'IPSetMachineConfiguration[szGuestDescription]');
 
 # TODO C Also test these:
 # 'szGuestName' => 'MY_NAME'
 # 'arPrivateNetworkList' => [ 'Net0Name'                                    ],
 
+undef %hInstanceConfiguration;
+InstCfgLoadInstanceConfiguration(\%hInstanceConfiguration, "unit_tests/example_InstanceConfiguration.xml");
 
+my %hInstallWrapperConfiguration;
+InstWrapLoadInstallWrapperConfiguration(\%hInstallWrapperConfiguration, "unit_tests/example_InstallWrapper.xml");
+
+IPMergeInstanceAndWrapperInfo(\%hInstanceConfiguration, \%hInstallWrapperConfiguration);
+my %hMergedNetworks = (
+          '0' => {
+                 'AutoAssignement' => 'dhcp',
+                 'Name' => 'pre0'
+               },
+          '1' => {
+                   'AutoAssignement' => 'dhcp',
+                   'Name' => 'inst0'
+                 },
+          '2' => {
+                   'Name' => 'inst1',
+                   'AutoAssignement' => 'dhcp'
+                 },
+          '3' => {
+                   'Name' => 'inst2'
+                 },
+          '4' => {
+                   'AutoAssignement' => 'dhcp',
+                   'Name' => 'post0'
+                 },
+          '5' => {
+                   'AutoAssignement' => 'dhcp',
+                   'Name' => 'post1'
+                 }
+);
+is_deeply($hInstanceConfiguration{'NetworkConfiguration'}, \%hMergedNetworks, 'InstWrapLoadInstallWrapperConfiguration(): Merged networks.');

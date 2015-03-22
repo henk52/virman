@@ -56,6 +56,7 @@ $VERSION = 0.2.0;
                 &InstCfgGetInstallWrapper
                 &InstCfgGetNetworkHash
                 &InstCfgGetRunCommandsList
+                &InstCfgLoadInstanceConfiguration
                 &InstCfgLoadXml
             );
 
@@ -110,7 +111,7 @@ sub GetNameOfAdminUserAccount {
   return($xmlTree->{'NameOfAdminUserAccount'}[0]);
 }
 
-# TODO Move this to a common pm so that InstallWrapper could also use it.
+# TODO V Merge this with InstWrapGetFileProvidedDuringCloudInit
 sub InstCfgGetFileProvidedDuringCloudInit {
 
   my %hConfig;
@@ -134,6 +135,7 @@ sub InstCfgGetFileProvidedDuringCloudInit {
 
 # -----------------------------------------------------------------
 # Returns the hash, keyd by the index, so that it can be easily sorted.
+# TODO V Merge this with InstWrapGetNetworkHash
 # ---------------
 sub InstCfgGetNetworkHash {
   my $xmlTree = shift;
@@ -178,6 +180,55 @@ sub InstCfgGetRunCommandsList {
 
 }
 
+
+# -----------------------------------------------------------------
+#** @function [public|protected|private] [return-type] function-name (parameters)
+# @brief A brief description of the function
+#
+# A detailed description of the function
+# @params value [required|optional] [details]
+# @retval value [details]
+# ....
+#*
+# ---------------
+sub InstCfgLoadInstanceConfiguration {
+  my $refConfHash = shift;
+  my $szFileName = shift;
+
+  # TODO verify the XML file exists.
+  my $xmlTree = InstCfgLoadXml($szFileName);
+
+  $refConfHash->{'Description'} = GetDescription($xmlTree);
+  $refConfHash->{'BaseDomainName'} = GetBaseDomainName($xmlTree);
+  $refConfHash->{'NameOfAdminUserAccount'}   = GetNameOfAdminUserAccount($xmlTree);
+
+  # TODO V only read it if it is defined?
+  $refConfHash->{'InstallWrapper'} = InstCfgGetInstallWrapper($xmlTree);
+
+  #print Dumper($xmlTree);
+  my %hNetworkConfiguration = InstCfgGetNetworkHash($xmlTree);
+
+  #print Dumper(\%hNetworkConfiguration);
+
+  $refConfHash->{'NetworkConfiguration'} = \%hNetworkConfiguration;
+
+  # TODO C Also provide functions: GetBaseDomainNameIfAvailable, where it is:
+  # GetBaseDomainNameIfAvailable($xmlTree, $refConfHash->{'BaseDomainName'});
+  # where the hash ref will be set if the data is available. Can I do it like this or would it have to be:
+  # GetBaseDomainNameIfAvailable($xmlTree, $refConfHash, 'BaseDomainName');
+
+  #die("!!! TODO read the network info as well.");
+  #Remember to also generate the global.yaml file.
+
+  # Get the file for installation.
+  # TODO C Get the run commands.
+  #print Dumper($refConfHash);
+  #print "------------------------------------\n";
+  #print Dumper($config);
+
+  #print "DDD $refConfHash->{'NameOfAdminUserAccount'}\n";
+  #die("!!! test end.");
+}
 
 
 # ----------------------------------------------------------------

@@ -68,17 +68,63 @@ $VERSION = 0.1.0;
 
 
 # -----------------------------------------------------------------
-#** @function [public|protected|private] [return-type] function-name (parameters)
+#** @function public IPMergeInstanceAndWrapperInfo
 # @brief Merge the Instance info and the, optional, install wrapper information.
 #
-# A detailed description of the function
-# @params value [required|optional] [details]
+# 
+# @params refhVirmanConfiguration required The Virman configuration Hash.
+# @params refhInstallWrapperConfiguration required The install wrapper data hash.
 # @retval value [details]
 # ....
 #*
 # ---------------
 sub IPMergeInstanceAndWrapperInfo {
-}
+  my $refhInstanceConfiguration = shift;
+  my $refhInstallWrapperConfiguration = shift;
+  
+  #print "--- refhInstanceConfiguration\n";
+  #print Dumper($refhInstanceConfiguration);
+
+
+  #print "--- refhInstallWrapperConfiguration\n";
+  #print Dumper($refhInstallWrapperConfiguration);
+
+  # Get length of pre list.
+  my @arInstWrapPreNetworkKeys = sort(keys  $refhInstallWrapperConfiguration->{'PreNetworkConfiguration'});
+
+  my @arInstWrapPostNetworkKeys = sort(keys  $refhInstallWrapperConfiguration->{'PostNetworkConfiguration'});
+
+  # reverse the list of instance network.
+  my @arInstanceNetworkKeys = reverse(sort(keys  $refhInstanceConfiguration->{'NetworkConfiguration'}));
+
+  #print Dumper(\@arInstWrapPreNetworkKeys);
+  #print Dumper(\@arInstanceNetworkKeys);
+  #print Dumper(\@arInstWrapPostNetworkKeys);
+  
+  # for each index, add the length of the pre lengt
+  my $nElementsInInstWrapPreNetwork = $#arInstWrapPreNetworkKeys+1;
+  foreach my $nIndex (@arInstanceNetworkKeys) {
+    #$data->{key3}{key4}{key6} = delete $data->{key3}{key4}{key5}
+    # see: http://stackoverflow.com/questions/1490356/how-to-replace-a-perl-hash-key
+    #print "DDD nIndex: $nIndex  arrayLength=$#arInstWrapPreNetworkKeys\n";
+    $refhInstanceConfiguration->{'NetworkConfiguration'}{$nIndex + $nElementsInInstWrapPreNetwork} = delete($refhInstanceConfiguration->{'NetworkConfiguration'}{$nIndex});
+  }
+
+  # insert the pre list
+  foreach my $nIndex (@arInstWrapPreNetworkKeys) {
+    $refhInstanceConfiguration->{'NetworkConfiguration'}{$nIndex} = $refhInstallWrapperConfiguration->{'PreNetworkConfiguration'}{$nIndex};
+  }
+
+  # insert the post list, add pre+instance number of entries to each post index.
+  my $nElementsInInstanceNetwork = $#arInstanceNetworkKeys + 1;
+  foreach my $nIndex (@arInstWrapPostNetworkKeys) {
+    $refhInstanceConfiguration->{'NetworkConfiguration'}{$nIndex + $nElementsInInstWrapPreNetwork + $nElementsInInstanceNetwork} = $refhInstallWrapperConfiguration->{'PostNetworkConfiguration'}{$nIndex};
+  }
+  
+  #print Dumper($refhInstanceConfiguration->{'NetworkConfiguration'});
+
+  #die("!!! Hey look here....");  
+} # end IPMergeInstanceAndWrapperInfo
 
 # ----------------------------------------------------
 # This function populates the $refhMachineConfiguration, which is used for
@@ -96,9 +142,11 @@ sub IPSetMachineConfiguration {
   my $szDomainName = shift;
   my $szInstanceNumber = shift;
 
+  confess("!!! szDomainName is not defined(4th parm)") unless(defined($szDomainName));
+  
   $refhMachineConfiguration->{'szGuestName'} = $szDomainName;
 
-# TODO C Support a dir for the instance machine dom.xml files.
+  # TODO C Support a dir for the instance machine dom.xml files.
   #$refhMachineConfiguration->{'szGasBaseDirectory'} = '/opt/gas';
 
   # TODO title and description should be retrieved from the role.xml file.

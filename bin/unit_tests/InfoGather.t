@@ -27,7 +27,7 @@ use Data::Dumper;
 use Test::More tests => 2;
 #use Test::Exception;
 
-# TODO C 'use' the perl module that is to be tested.
+# the perl module that is to be tested.
 use InfoGather;
 
 

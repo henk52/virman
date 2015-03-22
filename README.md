@@ -1,6 +1,8 @@
 # virman
 Virtual machine manager, a virsh wrapper in PERL.
 
+#TODO Do the Network merge for the IPMergeInstanceAndWrapperInfo
+TODO Do the Run command merge for IPMergeInstanceAndWrapperInfo
 TODO Read the install wrapper, if the app references one.
   - GetVNics
   - GetFileProvided
