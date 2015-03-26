@@ -50,15 +50,21 @@ use InfoExecute;
 
 
 my %hCombinedInstanceAndWrapperConf = (
-                     'BaseDomainName' => 'base'
-                       
+                     'BaseDomainName' => 'base',
+                     'NetworkConfiguration' => {
+                             '0' => {
+                             'AutoAssignement' => 'dhcp',
+                             'Name' => 'pre0'
+                                    }
+                     }
                                       );
 my %hMachineConfiguration = (
                      'szGuestName' => 'GUEST_NAME',
                      'szIsoImage'  => 'test.iso',
                      'szGuestStorageDevice' => 'guest_device',
                      'szGasBaseDirectory' => '.',
-                     'szGuestDriverType' => 'qcow2'
+                     'szGuestDriverType' => 'qcow2',
+                     'InstanceTempDirectory' => 'tmp_instance'
                             );
 my %hVirmanConfiguration = (
                      'SshPath' => '.',
@@ -68,6 +74,8 @@ my $szInstanceNumber = '008';
 
 my $szSshPubFile = "$hVirmanConfiguration{'SshPath'}/virman.pub";
 `touch $szSshPubFile`;
+
+`mkdir $hMachineConfiguration{'InstanceTempDirectory'}`;
 
 my $nStatus = IEGenerateCloudInitIsoImage(\%hCombinedInstanceAndWrapperConf, \%hVirmanConfiguration, \%hMachineConfiguration, $szInstanceNumber);
 is($nStatus, 0, 'superficial test of IEGenerateCloudInitIsoImage()');
@@ -82,9 +90,12 @@ is($nStatus, 0, 'superficial test of IECreateInstance()');
 
 unlink("virman.pub");
 unlink("virman");
-unlink("test.iso");
-unlink("user-data");
-unlink("meta-data");
+unlink("$hMachineConfiguration{'InstanceTempDirectory'}/test.iso");
+unlink("$hMachineConfiguration{'InstanceTempDirectory'}/user-data");
+unlink("$hMachineConfiguration{'InstanceTempDirectory'}/meta-data");
+unlink("$hMachineConfiguration{'InstanceTempDirectory'}/global.yaml");
+`rmdir $hMachineConfiguration{'InstanceTempDirectory'}`;
+
 
 unlink("$hMachineConfiguration{'szGuestName'}.xml");
 

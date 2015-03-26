@@ -90,7 +90,8 @@ sub GYUpdateNetworkCfg {
   die("!!! Filename is not given.") unless(defined($szYamlFileName));
   
   #print Dumper($refhNetworkConfig);
-  
+
+  die("!!! network config hash not provided.") unless(defined($refhNetworkConfig));  
   my @arNetworkKeys = sort(keys  $refhNetworkConfig);
   
   my $pYamlFileHandle;

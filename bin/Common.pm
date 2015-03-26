@@ -90,7 +90,7 @@ sub CmnAddFileEntry {
   # TODO V validate that the szEncoding is a supported type.
   # TODO V Validate the the $refhFileStructure->{$szGlobalYamlFile} doesn't exist already?
   $refhFileStructure->{$szGlobalYamlFile}{'SourceType'}       = $szEncoding;
-  $refhFileStructure->{$$szGlobalYamlFile}{'DestinationFile'} = $szTargetDestination;
+  $refhFileStructure->{$szGlobalYamlFile}{'DestinationFile'} = $szTargetDestination;
 } # end CmnAddFileEntry.
 
 # -----------------------------------------------------------------

@@ -170,7 +170,12 @@ sub IPSetMachineConfiguration {
   # TODO V When more than qcow is suppoerd the QcowFilePoolPath has to be interchangable iwth eg.g. LVMFilePoolPath.
   $refhMachineConfiguration->{'szGuestStorageDevice'} = "$refhVirmanConfiguration->{'QcowFilePoolPath'}/$refhMachineConfiguration->{'szGuestName'}.qcow2";
   # TODO V put this in a proctected subdir.
-  $refhMachineConfiguration->{'szIsoImage'} = "$refhVirmanConfiguration->{'CloudInitIsoFiles'}/$refhMachineConfiguration->{'szGuestName'}${szInstanceNumber}-cidata.iso";
+    # This is where all the pre-instance files are stored.
+  
+  # TODO N Does this 'InstanceTempDirectory' really belong in the $refhMachineConfiguration or should it rather be in $refhInstanceConfiguration
+  $refhMachineConfiguration->{'InstanceTempDirectory'} = "$refhVirmanConfiguration->{'CloudInitIsoFiles'}/$refhMachineConfiguration->{'szGuestName'}${szInstanceNumber}";
+  
+  $refhMachineConfiguration->{'szIsoImage'} = "$refhMachineConfiguration->{'InstanceTempDirectory'}/$refhMachineConfiguration->{'szGuestName'}${szInstanceNumber}-cidata.iso";
   
   # The Network list.
   # Sort the sub hash: NetworkConfiguration

@@ -82,3 +82,5 @@ print Dumper($yaml);
 is_deeply(@{$yaml}[0]->{'netconfig'}, \%hExpectedYamlNicConfig, 'Validate GYUpdateNetworkCfg()');
 
 unlink($szTestYamlFileName);
+
+# TODO Test with netconfig hash not there.

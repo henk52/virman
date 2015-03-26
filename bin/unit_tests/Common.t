@@ -44,4 +44,19 @@ use Common;
 # -----------------------------------------------------------------
 # ---------------
 
-CmnAddFileEntry();
+my %hFileStructure;
+my $szGlobalYaml = "global.yaml";
+my $szBase64Type = "Base64";
+my $szDestinationFile = "/tmp/global.yaml";
+
+CmnAddFileEntry(\%hFileStructure, $szGlobalYaml, $szBase64Type, $szDestinationFile);
+
+my %hExpectedFileStructure = (
+          "$szGlobalYaml" => {
+             'SourceType' => "$szBase64Type",
+             'DestinationFile' => "$szDestinationFile"
+          }
+);
+
+is_deeply(\%hFileStructure, \%hExpectedFileStructure, 'Validating CmnAddFileEntry()');
+

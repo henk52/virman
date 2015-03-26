@@ -49,8 +49,11 @@ use XML::Simple;
 
 
 use ExecuteAndTrace;
+use GlobalYaml;
+use Common;
 
-$VERSION = 0.1.0;
+
+$VERSION = 0.2.0;
 @ISA     = ('Exporter');
 
 # List the functions and var's that must be available.
@@ -113,7 +116,15 @@ sub IEGenerateCloudInitIsoImage {
   # TODO N Barf on missing data.
   # TODO V Barf on IDs already in use.
 
+  
   my %hCombinedInstanceAndWrapperConf = %{$refhCombinedInstanceAndWrapperConf};
+  
+  die("!!! The 'InstanceTempDirectory' not defined in the refhMachineConfiguration->{} Where the user-date etc is stored.") unless(exists($refhMachineConfiguration->{'InstanceTempDirectory'}));
+  
+  if ( ! -d $refhMachineConfiguration->{'InstanceTempDirectory'} ) {
+    DieIfExecuteFails("mkdir -p $refhMachineConfiguration->{'InstanceTempDirectory'}");
+    # TODO V act on exit code.
+  }
 
   my $szDomainName = $refhMachineConfiguration->{'szGuestName'};
 
@@ -121,12 +132,27 @@ sub IEGenerateCloudInitIsoImage {
     print Dumper($refhVirmanConfiguration);
     confess("!!! Missing the definition of 'SshPath' in the %VirmanConfiguration");
   }
+  
+  Log("III write: global.yaml");
+  my $szGlobalYamlFileName = "$refhMachineConfiguration->{'InstanceTempDirectory'}/global.yaml";
+  unlink($szGlobalYamlFileName);
+  
+  # TODO add the $szGlobalYamlFileName to the list of files that are included in the cloud-init file transfer.
+
+  # Generate the 'global.yaml' file for the instance.
+  GYUpdateNetworkCfg($refhCombinedInstanceAndWrapperConf->{'NetworkConfiguration'}, $szGlobalYamlFileName);
+  #print "DDD wrote $szGlobalYamlFileName\n";
+  #print Dumper(\%f_hVirmanConfiguration);
+
+  # Add the global.yaml to the list of files to include on the iso.
+  CmnAddFileEntry($refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'}, $szGlobalYamlFileName, 'Base64', '/etc/puppet/data/global.yaml');
+  
 
   Log("III write: meta-data");
 
-# TODO V Write these files to a unique subdirectory so that multiple operations can be done in parallel.
-  open( METADATA, ">meta-data" )
-    || die("!!! Failed to open for write: 'meta-data' - $!");
+# Write these files to a unique subdirectory so that multiple operations can be done in parallel.
+  open( METADATA, ">$refhMachineConfiguration->{'InstanceTempDirectory'}/meta-data" )
+    || die("!!! Failed to open for write: '$refhMachineConfiguration->{'InstanceTempDirectory'}/meta-data' - $!");
   print METADATA "instance-id: $szDomainName$szInstanceNumber\n";
   print METADATA "local-hostname: $szDomainName-$szInstanceNumber\n";
   close(METADATA);
@@ -149,8 +175,8 @@ sub IEGenerateCloudInitIsoImage {
 #my $szGlobalYamlGzipBin = join('', @arGlobalYamlGzipBinBase64List);
 
   Log("III write: user-data");
-  open( USERDATA, ">user-data" )
-    || die("!!! Failed to open for write: 'user-data' - $!");
+  open( USERDATA, ">$refhMachineConfiguration->{'InstanceTempDirectory'}/user-data" )
+    || die("!!! Failed to open for write: '$refhMachineConfiguration->{'InstanceTempDirectory'}/user-data' - $!");
   print USERDATA "#cloud-config\n";
   print USERDATA "users:\n";
   print USERDATA "  - name: $szAdminName\n";
@@ -168,17 +194,20 @@ sub IEGenerateCloudInitIsoImage {
 
   if ( exists( $hCombinedInstanceAndWrapperConf{'FileProvidedDuringCloudInit'} ) ) {
     print USERDATA "write_files:\n";
-    foreach my $refFileEntry (
-      @{ $hCombinedInstanceAndWrapperConf{'FileProvidedDuringCloudInit'} } )
-    {
-      print USERDATA "  - path: $refFileEntry->{'DestinationFile'}\n";
+    foreach my $refFileEntry ( @{ $hCombinedInstanceAndWrapperConf{'FileProvidedDuringCloudInit'} } ) {
+      my $szSourceFile = $refFileEntry->{'SourceFile'};
+      print USERDATA "  - path: $refFileEntry->{$szSourceFile}{'DestinationFile'}\n";
       print USERDATA "    permissions: 0644\n";
       print USERDATA "    owner: root\n";
-      print USERDATA "    encoding: $refFileEntry->{'SourceType'}\n";
+      print USERDATA "    encoding: $refFileEntry->{$szSourceFile}{'SourceType'}\n";
+      # TODO C I think the 'conten' type is dependent on the base type.
       print USERDATA "    content: |\n";
-
       #  print USERDATA "    content: !!binary |\n";
-      my $szBase64Encoding = `base64 --wrap=0 $refFileEntry->{'SourceFile'}`;
+      
+      # TODO C verify that it always looks like this, for all encoding types.
+      # Here it actaully gets encoded.
+      # Right now it is hard coded to base64 encoding.
+      my $szBase64Encoding = `base64 --wrap=0 $szSourceFile`;
       print USERDATA "      $szBase64Encoding\n";
     }
     print USERDATA "\n";
@@ -198,7 +227,7 @@ sub IEGenerateCloudInitIsoImage {
 
   Log("III Generate ISO image: $refhMachineConfiguration->{'szIsoImage'}");
   DieIfExecuteFails(
-"genisoimage -output $refhMachineConfiguration->{'szIsoImage'} -volid cidata -joliet -rock user-data meta-data"
+"cd $refhMachineConfiguration->{'InstanceTempDirectory'}; genisoimage -output $refhMachineConfiguration->{'szIsoImage'} -volid cidata -joliet -rock user-data meta-data"
   );
 
   #die("!!! testing exit.");
