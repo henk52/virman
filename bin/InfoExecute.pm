@@ -104,6 +104,7 @@ sub IEGetBackingFile {
 #  The two files:
 #     - meta-data
 #     - user-data
+# InstanceTempDirectory is defined in InfoProcessing.pm.
 #
 # See: http://www.projectatomic.io/blog/2014/10/getting-started-with-cloud-init/
 # ------------------
@@ -119,7 +120,8 @@ sub IEGenerateCloudInitIsoImage {
   
   my %hCombinedInstanceAndWrapperConf = %{$refhCombinedInstanceAndWrapperConf};
   
-  die("!!! The 'InstanceTempDirectory' not defined in the refhMachineConfiguration->{} Where the user-date etc is stored.") unless(exists($refhMachineConfiguration->{'InstanceTempDirectory'}));
+  
+  confess("!!! The 'InstanceTempDirectory' not defined in the refhMachineConfiguration->{} Where the user-date etc is stored.") unless(exists($refhMachineConfiguration->{'InstanceTempDirectory'}));
   
   if ( ! -d $refhMachineConfiguration->{'InstanceTempDirectory'} ) {
     DieIfExecuteFails("mkdir -p $refhMachineConfiguration->{'InstanceTempDirectory'}");
@@ -145,8 +147,12 @@ sub IEGenerateCloudInitIsoImage {
   #print Dumper(\%f_hVirmanConfiguration);
 
   # Add the global.yaml to the list of files to include on the iso.
+  if ( ! exists($refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'}) ) {
+    $refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'} = {};
+  }
   CmnAddFileEntry($refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'}, $szGlobalYamlFileName, 'Base64', '/etc/puppet/data/global.yaml');
-  
+  #print Dumper($refhCombinedInstanceAndWrapperConf);
+  #die("XXXXXXXXXXXXXXX");
 
   Log("III write: meta-data");
 
@@ -169,6 +175,8 @@ sub IEGenerateCloudInitIsoImage {
   if ( exists( $hCombinedInstanceAndWrapperConf{'NameOfAdminUserAccount'} ) ) {
     $szAdminName = $hCombinedInstanceAndWrapperConf{'NameOfAdminUserAccount'};
   }
+  
+    # TODO C This is probably used for getting files like app.zip etc, but where is it used??? FileProvidedDuringCloudInit
 
 #my $szGlobalYamlGzipBin = `base64 --wrap=0 ${szFilesPath}/global.yaml.gz`;
 #my @arGlobalYamlGzipBinBase64List = `base64 --wrap=0 ${szFilesPath}/global.yaml.gz`;
@@ -192,14 +200,15 @@ sub IEGenerateCloudInitIsoImage {
   print USERDATA "      - $szSshPublicKey\n";
   print USERDATA "\n";
 
-  if ( exists( $hCombinedInstanceAndWrapperConf{'FileProvidedDuringCloudInit'} ) ) {
+  if ( exists( $refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'} ) ) {
+    #print "DDD FileProvidedDuringCloudInit\n";
+    print Dumper($refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'});
     print USERDATA "write_files:\n";
-    foreach my $refFileEntry ( @{ $hCombinedInstanceAndWrapperConf{'FileProvidedDuringCloudInit'} } ) {
-      my $szSourceFile = $refFileEntry->{'SourceFile'};
-      print USERDATA "  - path: $refFileEntry->{$szSourceFile}{'DestinationFile'}\n";
+    foreach my $szSourceFile ( keys  $refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'}  ) {
+      print USERDATA "  - path: $refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'}{$szSourceFile}{'DestinationFile'}\n";
       print USERDATA "    permissions: 0644\n";
       print USERDATA "    owner: root\n";
-      print USERDATA "    encoding: $refFileEntry->{$szSourceFile}{'SourceType'}\n";
+      print USERDATA "    encoding: $refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'}{$szSourceFile}{'SourceType'}\n";
       # TODO C I think the 'conten' type is dependent on the base type.
       print USERDATA "    content: |\n";
       #  print USERDATA "    content: !!binary |\n";
@@ -247,7 +256,7 @@ sub IEGenerateCloudInitIsoImage {
 # ---------------
 sub IECreateInstance {
   my $refhCombinedInstanceAndWrapperConf = shift;
-  my $refhVirmanConfiguration               = shift;
+  my $refhVirmanConfiguration            = shift;
   my $refhMachineConfiguration           = shift;
   my $szTemplatePath                     = shift;
   my $szBackingFileQcow2                 = shift;
@@ -272,8 +281,9 @@ sub IECreateInstance {
 
   # TODO C Somewhere fill in the network list.
 
-  
-  my $szGuestXmlFile = "$refhVirmanConfiguration->{'CloudInitIsoFiles'}/$refhMachineConfiguration->{'szGuestName'}.xml";
+  # The $refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'} is populated in IEGenerateCloudInitIsoImage().
+  confess("!!! 'FileProvidedDuringCloudInit' not defined in the refhMachineConfiguration machine configuragration hash.") unless(exists($refhMachineConfiguration->{'InstanceTempDirectory'}));
+  my $szGuestXmlFile = "$refhMachineConfiguration->{'InstanceTempDirectory'}/$refhMachineConfiguration->{'szGuestName'}.xml";
   Log("III Writing: $szGuestXmlFile");
   open( OUTPUT_TEMPLATE,">$szGuestXmlFile")  || die("!!! failed to open file for write: $szGuestXmlFile - $!");
   print OUTPUT_TEMPLATE "$szResult";

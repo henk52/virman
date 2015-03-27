@@ -94,10 +94,8 @@ unlink("$hMachineConfiguration{'InstanceTempDirectory'}/test.iso");
 unlink("$hMachineConfiguration{'InstanceTempDirectory'}/user-data");
 unlink("$hMachineConfiguration{'InstanceTempDirectory'}/meta-data");
 unlink("$hMachineConfiguration{'InstanceTempDirectory'}/global.yaml");
+unlink("$hMachineConfiguration{'InstanceTempDirectory'}/$hMachineConfiguration{'szGuestName'}.xml");
 `rmdir $hMachineConfiguration{'InstanceTempDirectory'}`;
-
-
-unlink("$hMachineConfiguration{'szGuestName'}.xml");
 
 unlink("$szSshPubFile");
 

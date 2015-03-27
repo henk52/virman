@@ -82,15 +82,16 @@ $VERSION = 0.1.0;
 # ---------------
 sub CmnAddFileEntry {
   my $refhFileStructure   = shift;
-  my $szGlobalYamlFile    = shift;
+  my $szFileName          = shift;
   my $szEncoding          = shift;
   my $szTargetDestination = shift;
 
+  confess("!!! The hash to put this file information in, is not defined.") unless(defined($refhFileStructure));
   # TODO V Validate the parameters.
   # TODO V validate that the szEncoding is a supported type.
   # TODO V Validate the the $refhFileStructure->{$szGlobalYamlFile} doesn't exist already?
-  $refhFileStructure->{$szGlobalYamlFile}{'SourceType'}       = $szEncoding;
-  $refhFileStructure->{$szGlobalYamlFile}{'DestinationFile'} = $szTargetDestination;
+  $refhFileStructure->{$szFileName}{'SourceType'}       = $szEncoding;
+  $refhFileStructure->{$szFileName}{'DestinationFile'}  = $szTargetDestination;
 } # end CmnAddFileEntry.
 
 # -----------------------------------------------------------------
