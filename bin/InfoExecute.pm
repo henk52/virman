@@ -153,7 +153,9 @@ sub IEGenerateCloudInitIsoImage {
 
   my $szPostConfigTgzFile = "$refhVirmanConfiguration->{'CloudInitIsoFiles'}/postconfig-0.1.0-noarch.tgz";
   if ( ! -f $szPostConfigTgzFile ) {
+    die("!!! $refhVirmanConfiguration->{'FilesPath'}/postconfig/etc does not exist.") unless( -d "$refhVirmanConfiguration->{'FilesPath'}/postconfig/etc");
     # Create the .tgz file. 
+    Log("III generating: szPostConfigTgzFile\n");
     DieIfExecuteFails("cd $refhVirmanConfiguration->{'FilesPath'}/postconfig; tar -zcf $szPostConfigTgzFile etc");
   }
   # Add the szPostConfigTgzFile to the list of files to include on the iso.

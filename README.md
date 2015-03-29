@@ -33,6 +33,7 @@ TODO Merge the data from the install wrapper with the Instance data
 TODO get the 'configuration' network to work.
 TODO get the app files added.
 TODO install the app (files)
+TODO How do I handle if I call virtman-clone.pl in parralele, and postconfig isn't created.
 
 TODO make virman-clone.pl support multiple roles
   verify that the role exists

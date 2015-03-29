@@ -109,7 +109,7 @@ sub GYUpdateNetworkCfg {
   my %hYamlGlobalConfig;
   my %hYamlNetConfig;
   foreach my $szIndex (@arNetworkKeys) {
-    if ( $refhNetworkConfig->{$szIndex}{'AutoAssignement'} eq "dhcp" ) {
+    if ( ( exists($refhNetworkConfig->{$szIndex}{'AutoAssignement'}) ) && ( $refhNetworkConfig->{$szIndex}{'AutoAssignement'} eq "dhcp" ) ) {
       my %hNic = ( 
            'nic_name' => $refhNetworkConfig->{$szIndex}{'Name'},
            'boot_proto' => 'dhcp'

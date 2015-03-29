@@ -1,6 +1,6 @@
-# == Class: gls
+# == Class: postconfig
 #
-# Full description of class gls here.
+# Full description of class postconfig here.
 #
 # === Parameters
 #
@@ -23,7 +23,7 @@
 #
 # === Examples
 #
-#  class { gls:
+#  class { postconfig:
 #    servers => [ 'pool.ntp.org', 'ntp.local.company.com' ],
 #  }
 #
@@ -35,7 +35,7 @@
 #
 # Copyright 2015 Your name here, unless otherwise noted.
 #
-class gls {
+class postconfig {
 
 $arNetconfigList = hiera('netconfig')
 
