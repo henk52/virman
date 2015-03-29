@@ -53,7 +53,7 @@ use GlobalYaml;
 use Common;
 
 
-$VERSION = 0.2.0;
+$VERSION = 0.3.0;
 @ISA     = ('Exporter');
 
 # List the functions and var's that must be available.
@@ -139,20 +139,38 @@ sub IEGenerateCloudInitIsoImage {
   my $szGlobalYamlFileName = "$refhMachineConfiguration->{'InstanceTempDirectory'}/global.yaml";
   unlink($szGlobalYamlFileName);
   
-  # TODO add the $szGlobalYamlFileName to the list of files that are included in the cloud-init file transfer.
-
-  # Generate the 'global.yaml' file for the instance.
-  GYUpdateNetworkCfg($refhCombinedInstanceAndWrapperConf->{'NetworkConfiguration'}, $szGlobalYamlFileName);
-  #print "DDD wrote $szGlobalYamlFileName\n";
-  #print Dumper(\%f_hVirmanConfiguration);
-
-  # Add the global.yaml to the list of files to include on the iso.
+  # If there is no hash entry for/of the 'FileProvidedDuringCloudInit', then create an empty one.
   if ( ! exists($refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'}) ) {
     $refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'} = {};
   }
+
+  # Generate the 'global.yaml' file for the instance.
+  GYUpdateNetworkCfg($refhCombinedInstanceAndWrapperConf->{'NetworkConfiguration'}, $szGlobalYamlFileName);
+  
+
+  # Add the global.yaml to the list of files to include on the iso.
   CmnAddFileEntry($refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'}, $szGlobalYamlFileName, 'Base64', '/etc/puppet/data/global.yaml');
-  #print Dumper($refhCombinedInstanceAndWrapperConf);
-  #die("XXXXXXXXXXXXXXX");
+
+  my $szPostConfigTgzFile = "$refhVirmanConfiguration->{'CloudInitIsoFiles'}/postconfig-0.1.0-noarch.tgz";
+  if ( ! -f $szPostConfigTgzFile ) {
+    # Create the .tgz file. 
+    DieIfExecuteFails("cd $refhVirmanConfiguration->{'FilesPath'}/postconfig; tar -zcf $szPostConfigTgzFile etc");
+  }
+  # Add the szPostConfigTgzFile to the list of files to include on the iso.
+  CmnAddFileEntry($refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'}, $szPostConfigTgzFile, 'Base64', '/vagrant/tgz_modules/postconfig.tgz');
+  
+  if ( ! exists( $hCombinedInstanceAndWrapperConf{'RunCommand'} ) ) {
+    # TODO V Unit test this.
+    $hCombinedInstanceAndWrapperConf{'RunCommand'} = [];
+  }
+  
+  # Add the command to extract the tgz modules;
+  my @arPostConfigCommands = ( 'cd /; tar -zxf /vagrant/tgz_modules/*.tgz', 'puppet apply /etc/puppet/modules/postconfig/test/init.pp' );
+  # This will put the arPostConfigCommands as the first two commands, in the order shown above.
+  unshift($hCombinedInstanceAndWrapperConf{'RunCommand'}, @arPostConfigCommands);
+  #push($hCombinedInstanceAndWrapperConf{'RunCommand'}, "cd /; tar -zxf /vagrant/tgz_modules/*.tgz");
+  
+  
 
   Log("III write: meta-data");
 
@@ -162,6 +180,8 @@ sub IEGenerateCloudInitIsoImage {
   print METADATA "instance-id: $szDomainName$szInstanceNumber\n";
   print METADATA "local-hostname: $szDomainName-$szInstanceNumber\n";
   close(METADATA);
+
+
 
   my $szGeneralContainerKeyFile = "$refhVirmanConfiguration->{'SshPath'}/virman";
   if ( !-f "${szGeneralContainerKeyFile}.pub" ) {

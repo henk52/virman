@@ -38,7 +38,7 @@ my $f_szVirmanConfigurationFile = "/etc/virman/default.xml";
 my $f_szInstanceNumber = "001";
 
 my $szTemplatePath = "$FindBin::RealBin/../templates";
-my $szFilesPath = "$FindBin::RealBin/../files";
+my $f_szFilesPath = "$FindBin::RealBin/../files";
 
 # TODO C put this in a protected directory.
 my $f_szGeneralContainerKeyFile;
@@ -70,6 +70,8 @@ my $szDomainName = shift || die("!!! You must provide a role name.");
 # %f_hMachineConfiguration - the data going into the domain xml file.
 
 IGLoadVirmanConfiguration(\%f_hVirmanConfiguration, $f_szVirmanConfigurationFile);
+
+$f_hVirmanConfiguration{'FilesPath'} = $f_szFilesPath;
 
 my $szXmlConfigurationFilename = "$f_hVirmanConfiguration{'InstanceCfgBasePath'}/${szDomainName}/${szDomainName}.xml";
 

@@ -1,6 +1,6 @@
-gls
+postconfig
 
-This is the gls module.
+This is the postconfig module.
 
 License
 -------

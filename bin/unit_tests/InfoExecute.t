@@ -68,12 +68,16 @@ my %hMachineConfiguration = (
                             );
 my %hVirmanConfiguration = (
                      'SshPath' => '.',
-                     'CloudInitIsoFiles' => '.'
+                     'CloudInitIsoFiles' => '.',
+                     'FilesPath' => '.'
                            );
 my $szInstanceNumber = '008';
 
 my $szSshPubFile = "$hVirmanConfiguration{'SshPath'}/virman.pub";
 `touch $szSshPubFile`;
+
+my $szPostConfigTgzFile = "postconfig-0.1.0-noarch.tgz";
+`echo "CONTENT" > $szPostConfigTgzFile`;
 
 `mkdir $hMachineConfiguration{'InstanceTempDirectory'}`;
 
@@ -98,4 +102,5 @@ unlink("$hMachineConfiguration{'InstanceTempDirectory'}/$hMachineConfiguration{'
 `rmdir $hMachineConfiguration{'InstanceTempDirectory'}`;
 
 unlink("$szSshPubFile");
+unlink("$szPostConfigTgzFile");
 

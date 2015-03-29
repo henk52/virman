@@ -87,6 +87,10 @@ sub CmnAddFileEntry {
   my $szTargetDestination = shift;
 
   confess("!!! The hash to put this file information in, is not defined.") unless(defined($refhFileStructure));
+  confess("!!! The filename has not been provided.") unless(defined($szFileName));
+  confess("!!! The encoding has not been provided.") unless(defined($szEncoding));
+  confess("!!! The target destination has not been provided.") unless(defined($szTargetDestination));
+  
   # TODO V Validate the parameters.
   # TODO V validate that the szEncoding is a supported type.
   # TODO V Validate the the $refhFileStructure->{$szGlobalYamlFile} doesn't exist already?
