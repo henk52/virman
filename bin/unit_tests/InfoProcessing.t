@@ -95,10 +95,16 @@ my %hMergedNetworks = (
                    'Name' => 'inst2'
                  },
           '4' => {
+                   'Name' => 'fix1',
+                   'AutoAssignement' => 'static',
+                   'IpAddress' => '10.1.2.3',
+                   'NetMask' => '255.255.255.0'
+                 },
+          '5' => {
                    'AutoAssignement' => 'dhcp',
                    'Name' => 'post0'
                  },
-          '5' => {
+          '6' => {
                    'AutoAssignement' => 'dhcp',
                    'Name' => 'post1'
                  }

@@ -69,17 +69,18 @@ my %hMachineConfiguration = (
 my %hVirmanConfiguration = (
                      'SshPath' => '.',
                      'CloudInitIsoFiles' => '.',
-                     'FilesPath' => '.'
+                     'FilesPath' => 'tmp_instance'
                            );
 my $szInstanceNumber = '008';
 
 my $szSshPubFile = "$hVirmanConfiguration{'SshPath'}/virman.pub";
 `touch $szSshPubFile`;
 
-my $szPostConfigTgzFile = "postconfig-0.1.0-noarch.tgz";
+my $szPostConfigTgzFile = "postconfig-0.2.0-noarch.tgz";
 `echo "CONTENT" > $szPostConfigTgzFile`;
 
 `mkdir $hMachineConfiguration{'InstanceTempDirectory'}`;
+`mkdir -p $hMachineConfiguration{'InstanceTempDirectory'}/postconfig/etc`;
 
 my $nStatus = IEGenerateCloudInitIsoImage(\%hCombinedInstanceAndWrapperConf, \%hVirmanConfiguration, \%hMachineConfiguration, $szInstanceNumber);
 is($nStatus, 0, 'superficial test of IEGenerateCloudInitIsoImage()');
@@ -99,6 +100,8 @@ unlink("$hMachineConfiguration{'InstanceTempDirectory'}/user-data");
 unlink("$hMachineConfiguration{'InstanceTempDirectory'}/meta-data");
 unlink("$hMachineConfiguration{'InstanceTempDirectory'}/global.yaml");
 unlink("$hMachineConfiguration{'InstanceTempDirectory'}/$hMachineConfiguration{'szGuestName'}.xml");
+`rmdir $hMachineConfiguration{'InstanceTempDirectory'}/postconfig/etc`;
+`rmdir $hMachineConfiguration{'InstanceTempDirectory'}/postconfig`;
 `rmdir $hMachineConfiguration{'InstanceTempDirectory'}`;
 
 unlink("$szSshPubFile");

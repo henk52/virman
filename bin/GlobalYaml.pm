@@ -14,21 +14,21 @@ use strict;
 #
 # This module will create and/or update a global.yaml file.
 #
-#* 
+#*
 #----------------------------------- SYNOPSIS -----------------------------------
 #    CAUTIONS:
 #
 #    ASSUMPTIONS/PRECONDITIONS:
-#        
+#
 #    POSTCONDITIONS:
 #
 #    PARAMETER DESCRIPTION:
 #        Input:
 #
-#                                    
+#
 #        Return value:
 #            none
-#           
+#
 #
 #--------------------------- GLOBAL DATA DESCRIPTION ----------------------------
 #---------------------------- PROJECT SPECIFIC DATA -----------------------------
@@ -45,23 +45,18 @@ use Data::Dumper;
 
 use YAML::Tiny;
 
-
-
-$VERSION = 0.1.0;
-@ISA = ('Exporter');
+$VERSION = 0.2.0;
+@ISA     = ('Exporter');
 
 # List the functions and var's that must be available.
 # If you want to create a global var, create it as 'our'
 @EXPORT = qw(
-                &GYUpdateNetworkCfg
-            );
-
+  &GYUpdateNetworkCfg
+);
 
 # ==============================================================================
 #                              V A R I A B L E S
 # ==============================================================================
-
-
 
 # ==============================================================================
 #                               F U N C T I O N S
@@ -76,6 +71,9 @@ $VERSION = 0.1.0;
 #   If the entry exists in yaml update it.
 #   otherwise create it.
 #
+# This function will go through the entire list and create two
+#   hashes of network confs, one for static and one for dhcp.
+#
 # TODO V implement reading/merging with existing data.
 #
 # @params value [required|optional] [details]
@@ -85,46 +83,64 @@ $VERSION = 0.1.0;
 # ---------------
 sub GYUpdateNetworkCfg {
   my $refhNetworkConfig = shift;
-  my $szYamlFileName = shift;
-  
-  die("!!! Filename is not given.") unless(defined($szYamlFileName));
-  
-  #print Dumper($refhNetworkConfig);
+  my $szYamlFileName    = shift;
 
-  die("!!! network config hash not provided.") unless(defined($refhNetworkConfig));  
-  my @arNetworkKeys = sort(keys  $refhNetworkConfig);
-  
+  die("!!! Filename is not given.") unless ( defined($szYamlFileName) );
+  die("!!! network config hash not provided.") unless ( defined($refhNetworkConfig) );
+
+  #print Dumper($refhNetworkConfig);
+  #die("XXXXXXXXXXXXXXXXXXXXX");
+
+  my @arNetworkKeys = sort( keys $refhNetworkConfig );
+
   my $pYamlFileHandle;
   my $yaml;
-  
-  if ( ! -f $szYamlFileName ) {
+
+  if ( !-f $szYamlFileName ) {
     #open($pYamlFileHandle, ">$szYamlFileName") || die("!!! could not open file for write: $szYamlFileName - $!");
     $yaml = YAML::Tiny->new();
   } else {
     #open($pYamlFileHandle, "$szYamlFileName") || die("!!! could not open file for read/write: $szYamlFileName - $!");
-    $yaml = YAML::Tiny->read( $szYamlFileName );
+    $yaml = YAML::Tiny->read($szYamlFileName);
   }
+
   #close($pYamlFileHandle);
   #print Dumper($yaml);
   my %hYamlGlobalConfig;
-  my %hYamlNetConfig;
+  my %hYamlDynamicNetConfig;
+  my %hYamlStaticNetConfig;
   foreach my $szIndex (@arNetworkKeys) {
-    if ( ( exists($refhNetworkConfig->{$szIndex}{'AutoAssignement'}) ) && ( $refhNetworkConfig->{$szIndex}{'AutoAssignement'} eq "dhcp" ) ) {
-      my %hNic = ( 
-           'nic_name' => $refhNetworkConfig->{$szIndex}{'Name'},
-           'boot_proto' => 'dhcp'
-           );
-      $hYamlNetConfig{"vnic" . $refhNetworkConfig->{$szIndex}{'Name'}} = \%hNic;
-    } # endif dhcp.
-  } # endif foreach.
-  #$yaml->{'netconfig'} = \%hYamlNetConfig;
-  $hYamlGlobalConfig{'netconfig'} = \%hYamlNetConfig;
-  push(@{$yaml}, \%hYamlGlobalConfig);
+    if ( exists( $refhNetworkConfig->{$szIndex}{'AutoAssignement'} ) ) {
+      if ( $refhNetworkConfig->{$szIndex}{'AutoAssignement'} eq "dhcp" )
+      {
+        my %hNic = ( 'nic_name' => "eth$szIndex" );
+        $hYamlDynamicNetConfig{ "vnic"
+            . $refhNetworkConfig->{$szIndex}{'Name'} } = \%hNic;
+      }
+      else {    # endif dhcp.
+        my %hNic = ( 
+               'nic_name' => "eth$szIndex",
+               'ip_addr'  =>  $refhNetworkConfig->{$szIndex}{'IpAddress'},
+               'netmask'  =>  $refhNetworkConfig->{$szIndex}{'NetMask'}
+               );
+        $hYamlDynamicNetConfig{ "vnic"
+            . $refhNetworkConfig->{$szIndex}{'Name'} } = \%hNic;
+      }
+    }    # end if autoassingment.
+  }    # endif foreach.
+  if (%hYamlDynamicNetConfig) {
+    $hYamlGlobalConfig{'dynamicnetconfig'} = \%hYamlDynamicNetConfig;
+  }
+  if (%hYamlStaticNetConfig) {
+    $hYamlGlobalConfig{'staticnetconfig'}  = \%hYamlStaticNetConfig;
+  }
+  push( @{$yaml}, \%hYamlGlobalConfig );
+
   #print Dumper(\%hYamlGlobalConfig);
-  #print Dumper($yaml);
-  
+  #print Dumper($yaml); die("XXXXXXXXXXXXXXXXXXX");
+
   # Save the document back to the file
-  $yaml->write( $szYamlFileName );
+  $yaml->write($szYamlFileName);
 
   #die("XXX END TEST");
 }

@@ -31,6 +31,12 @@ my %ExpectedNetworkConfiguration = (
                   },
      '2' => {
                     'Name' => 'inst2',
+                   },
+     '3' => {
+                    'Name' => 'fix1',
+                    'AutoAssignement' => 'static',
+                    'IpAddress' => '10.1.2.3',
+                    'NetMask' => '255.255.255.0'
                    }
    );
 my %hActualNetworkConfiguration = InstCfgGetNetworkHash($xmlTree);

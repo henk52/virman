@@ -69,18 +69,18 @@ my $yaml = YAML::Tiny->read( $szTestYamlFileName );
 
 my %hExpectedYamlNicConfig = (
                            'vnicpost0' => {
-                                            'nic_name' => 'post0',
-                                            'boot_proto' => 'dhcp'
+                                            'nic_name' => 'eth0'
                                           },
                            'vnicpost1' => {
-                                            'nic_name' => 'post1',
-                                            'boot_proto' => 'dhcp'
+                                            'nic_name' => 'eth1'
                                           }
                              );
 print Dumper($yaml);
 
-is_deeply(@{$yaml}[0]->{'netconfig'}, \%hExpectedYamlNicConfig, 'Validate GYUpdateNetworkCfg()');
+is_deeply(@{$yaml}[0]->{'dynamicnetconfig'}, \%hExpectedYamlNicConfig, 'Validate GYUpdateNetworkCfg()');
 
+
+# TODO V Make a test where static is also involved.
 unlink($szTestYamlFileName);
 
 # TODO Test with netconfig hash not there.

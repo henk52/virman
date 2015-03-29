@@ -15,6 +15,12 @@
   <VNic Index="2">
     <NetworkName>inst2</NetworkName>
   </VNic>
+  <VNic Index="3">
+    <NetworkName>fix1</NetworkName>
+    <AutoAssignement>static</AutoAssignement>
+    <IpAddress>10.1.2.3</IpAddress>
+    <NetMask>255.255.255.0</NetMask>
+  </VNic>
   <InstallWrapper>ripwrap</InstallWrapper>
 </VIRMAN_INSTANCE_CONFIGURAITON>
 </xml>

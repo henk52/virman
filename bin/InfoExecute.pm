@@ -151,7 +151,7 @@ sub IEGenerateCloudInitIsoImage {
   # Add the global.yaml to the list of files to include on the iso.
   CmnAddFileEntry($refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'}, $szGlobalYamlFileName, 'Base64', '/etc/puppet/data/global.yaml');
 
-  my $szPostConfigTgzFile = "$refhVirmanConfiguration->{'CloudInitIsoFiles'}/postconfig-0.1.0-noarch.tgz";
+  my $szPostConfigTgzFile = "$refhVirmanConfiguration->{'CloudInitIsoFiles'}/postconfig-0.2.0-noarch.tgz";
   if ( ! -f $szPostConfigTgzFile ) {
     die("!!! $refhVirmanConfiguration->{'FilesPath'}/postconfig/etc does not exist.") unless( -d "$refhVirmanConfiguration->{'FilesPath'}/postconfig/etc");
     # Create the .tgz file. 

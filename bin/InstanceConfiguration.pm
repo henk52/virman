@@ -42,7 +42,7 @@ use XML::Simple;
 
 
 
-$VERSION = 0.2.0;
+$VERSION = 0.3.0;
 @ISA = ('Exporter');
 
 # List the functions and var's that must be available.
@@ -148,6 +148,12 @@ sub InstCfgGetNetworkHash {
     $hNetworks{$szKey}{'Name'} = @{$hrefVNic->{'NetworkName'}}[0];
     if ( exists($hrefVNic->{'AutoAssignement'}) ) {
       $hNetworks{$szKey}{'AutoAssignement'} = @{$hrefVNic->{'AutoAssignement'}}[0];
+    }
+    if ( exists($hrefVNic->{'IpAddress'}) ) {
+      $hNetworks{$szKey}{'IpAddress'} = @{$hrefVNic->{'IpAddress'}}[0];
+    }
+    if ( exists($hrefVNic->{'NetMask'}) ) {
+      $hNetworks{$szKey}{'NetMask'} = @{$hrefVNic->{'NetMask'}}[0];
     }
     #print "Name: $szNetworkName\n";
   }

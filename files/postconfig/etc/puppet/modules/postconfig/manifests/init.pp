@@ -37,10 +37,11 @@
 #
 class postconfig {
 
-$arNetconfigList = hiera('netconfig')
+$arStaticNetconfigList = hiera('staticnetconfig')
+$arDhcpNetconfigList   = hiera('dynamicnetconfig')
 
 
-define implement_netconfig($nic_name, $ip_addr, $netmask) {
+define implement_staticnetconfig($nic_name, $ip_addr, $netmask) {
   network::if::static { "$nic_name":
     ensure    => 'up',
     ipaddress => "$ip_addr", 
@@ -48,7 +49,13 @@ define implement_netconfig($nic_name, $ip_addr, $netmask) {
   }    
 }
 
-create_resources( implement_netconfig, $arNetconfigList )
+define implement_dynamicnetconfig($nic_name) {
+  network::if::dynamic { "$nic_name":
+    ensure    => 'up',
+  }    
+}
+
+create_resources( implement_staticnetconfig, $arNetconfigList )
 
 
 }
