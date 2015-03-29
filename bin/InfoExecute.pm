@@ -202,7 +202,7 @@ sub IEGenerateCloudInitIsoImage {
 
   if ( exists( $refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'} ) ) {
     #print "DDD FileProvidedDuringCloudInit\n";
-    print Dumper($refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'});
+    #print Dumper($refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'});
     print USERDATA "write_files:\n";
     foreach my $szSourceFile ( keys  $refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'}  ) {
       print USERDATA "  - path: $refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'}{$szSourceFile}{'DestinationFile'}\n";
