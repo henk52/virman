@@ -167,7 +167,7 @@ sub IEGenerateCloudInitIsoImage {
   }
   
   # Add the command to extract the tgz modules;
-  my @arPostConfigCommands = ( 'cd /; tar -zxf /vagrant/tgz_modules/*.tgz', 'puppet apply /etc/puppet/modules/postconfig/test/init.pp' );
+  my @arPostConfigCommands = ( 'cd /; tar -zxf /vagrant/tgz_modules/*.tgz', 'puppet apply /etc/puppet/modules/postconfig/tests/init.pp' );
   # This will put the arPostConfigCommands as the first two commands, in the order shown above.
   unshift($hCombinedInstanceAndWrapperConf{'RunCommand'}, @arPostConfigCommands);
   #push($hCombinedInstanceAndWrapperConf{'RunCommand'}, "cd /; tar -zxf /vagrant/tgz_modules/*.tgz");
@@ -214,10 +214,15 @@ sub IEGenerateCloudInitIsoImage {
 
   # TODO this needs to be dependent on the OS family.
   print USERDATA "    sudo: ALL=(ALL) NOPASSWD:ALL\n";
-  print USERDATA "    groups: adm,wheel,systemd-journal\n";
+#  print USERDATA "    groups: [ adm, wheel, systemd-journal ]\n";
+  print USERDATA "    groups:\n";
+  print USERDATA "      - adm\n";
+  print USERDATA "      - wheel\n";
+  print USERDATA "      - systemd-journal\n";
   print USERDATA "    lock-passwd: true\n";
-  print USERDATA "    chpasswd: { expire: False }\n";
-  print USERDATA "    ssh_pwauth: True\n";
+# See https://github.com/number5/cloud-init/blob/master/doc/examples/cloud-config.txt
+#  print USERDATA "    chpasswd: { expire: False }\n";
+#  print USERDATA "    ssh_pwauth: True\n";
   print USERDATA "    ssh_authorized_keys:\n";
   print USERDATA "      - $szSshPublicKey\n";
   print USERDATA "\n";
