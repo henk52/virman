@@ -37,8 +37,8 @@
 #
 class postconfig {
 
-$arStaticNetconfigList = hiera('staticnetconfig')
-$arDhcpNetconfigList   = hiera('dynamicnetconfig')
+$arStaticNetconfigList = hiera('staticnetconfig', {})
+$arDynamicNetconfigList   = hiera('dynamicnetconfig', {})
 
 
 define implement_staticnetconfig($nic_name, $ip_addr, $netmask) {
@@ -55,7 +55,16 @@ define implement_dynamicnetconfig($nic_name) {
   }    
 }
 
-create_resources( implement_staticnetconfig, $arNetconfigList )
+$arStaticKeys = keys($arStaticNetconfigList)
+if size($arStaticKeys) > 0 {
+  create_resources( implement_staticnetconfig, $arStaticNetconfigList )
+}
+
+$arDynamicKeys = keys($arDynamicNetconfigList)
+if size($arDynamicKeys) > 0 {
+  create_resources( implement_dynamicnetconfig, $arDynamicNetconfigList )
+}
 
 
 }
+
