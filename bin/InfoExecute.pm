@@ -167,7 +167,9 @@ sub IEGenerateCloudInitIsoImage {
   }
   
   # Add the command to extract the tgz modules;
-  my @arPostConfigCommands = ( 'cd /; tar -zxf /vagrant/tgz_modules/*.tgz', 'puppet apply /etc/puppet/modules/postconfig/tests/init.pp' );
+  my @arPostConfigCommands = ( 'cd /; tar -zxf /vagrant/tgz_modules/*.tgz', 'puppet apply /etc/puppet/modules/postconfig/tests/init.pp; /sbin/service network start' );
+  # -- the above: service network start is needed if no ipaddr is configured prirp to this line, otherwise it wil fail.
+
   # This will put the arPostConfigCommands as the first two commands, in the order shown above.
   unshift($hCombinedInstanceAndWrapperConf{'RunCommand'}, @arPostConfigCommands);
   #push($hCombinedInstanceAndWrapperConf{'RunCommand'}, "cd /; tar -zxf /vagrant/tgz_modules/*.tgz");
