@@ -7,7 +7,7 @@ use FindBin;
 BEGIN{
 	  push( @INC, "$FindBin::RealBin",  "$FindBin::RealBin/..");    ## Path to local modules
 }
-use Test::More tests => 7;
+use Test::More tests => 9;
 
 use InstanceConfiguration;
 
@@ -43,3 +43,28 @@ my %hActualNetworkConfiguration = InstCfgGetNetworkHash($xmlTree);
 is_deeply(\%hActualNetworkConfiguration, \%ExpectedNetworkConfiguration, 'GetNetworkHash().');
 
 is(InstCfgGetInstallWrapper($xmlTree), 'ripwrap', 'InstCfgGetInstallWrapper()');
+
+#print Dumper($xmlTree);
+
+my @arExpectedCommandList = ( 'command1', 'command2');
+my $refarActualCommandList = InstCfgGetRunCommandsList($xmlTree);
+#print Dumper(\@arActualCommandList);
+#print Dumper(\@arExpectedCommandList);
+is_deeply($refarActualCommandList, \@arExpectedCommandList, 'InstCfgGetRunCommandsList()');
+
+my %hExpectedFileList = (
+    'alpha.tgz' => {
+        'SourceType' => 'Base64',
+        'DestinationFile' => '/vagrant/alpha.tgz'
+    },
+    'bravo.tgz' => {
+        'SourceType' => 'Base64',
+        'DestinationFile' => '/vagrant/bravo.tgz'
+    }
+    
+                        );
+my %hActualFileList = InstCfgGetFileProvidedDuringCloudInit($xmlTree);
+#print Dumper(\%hActualFileList);
+is_deeply(\%hActualFileList, \%hExpectedFileList, 'InstCfgGetFileProvidedDuringCloudInit()');
+
+

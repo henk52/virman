@@ -101,6 +101,9 @@ sub IPMergeInstanceAndWrapperInfo {
   #print Dumper(\@arInstanceNetworkKeys);
   #print Dumper(\@arInstWrapPostNetworkKeys);
   
+  #print Dumper($refhInstallWrapperConfiguration);
+  #print Dumper($refhInstanceConfiguration);
+  
   # for each index, add the length of the pre lengt
   my $nElementsInInstWrapPreNetwork = $#arInstWrapPreNetworkKeys+1;
   foreach my $nIndex (@arInstanceNetworkKeys) {

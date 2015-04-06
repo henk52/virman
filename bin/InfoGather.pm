@@ -48,7 +48,7 @@ use InstanceConfiguration;
 
 
 
-$VERSION = 0.1.0;
+$VERSION = 0.1.1;
 @ISA = ('Exporter');
 
 # List the functions and var's that must be available.
@@ -148,17 +148,10 @@ sub IGReadInstanceConfiguration {
   # where the hash ref will be set if the data is available. Can I do it like this or would it have to be:
   # GetBaseDomainNameIfAvailable($xmlTree, $refConfHash, 'BaseDomainName');
 
-  #die("!!! TODO read the network info as well.");
-  #Remember to also generate the global.yaml file.
 
   # Get the file for installation.
-  # TODO C Get the run commands.
-  #print Dumper($refConfHash);
-  #print "------------------------------------\n";
-  #print Dumper($config);
-
-  #print "DDD $refConfHash->{'NameOfAdminUserAccount'}\n";
-  #die("!!! test end.");
+  my @arRunCommands = InstCfgGetRunCommandsList($xmlTree);
+  $refConfHash->{'RunCommand'} = \@arRunCommands;
 }
 
 

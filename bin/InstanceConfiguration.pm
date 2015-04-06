@@ -40,9 +40,10 @@ use Carp;
 use Data::Dumper;
 use XML::Simple;
 
+use Common;
 
 
-$VERSION = 0.3.0;
+$VERSION = 0.4.0;
 @ISA = ('Exporter');
 
 # List the functions and var's that must be available.
@@ -176,13 +177,15 @@ sub InstCfgGetInstallWrapper {
 # ---------------
 # TODO Move this to a common pm so that InstallWrapper could also use it.
 sub InstCfgGetRunCommandsList {
-  my $config;
-  if ( exists($config->{'RunCommand'}) ) {
-    my @arRunCommand   = $config->{'RunCommand'};
-    #$refConfHash->{'RunCommand'} = \@arRunCommand;
-#    $refConfHash->{'RunCommand'} = $config->{'RunCommand'};
+  my $xmlTree = shift;
+  confess("!!! the xmlTree(first parm) is not defined.") unless(defined($xmlTree));
+  
+  my $ReturnValue;
+  if ( exists($xmlTree->{'RunCommand'}) ) {
+    #print Dumper($xmlTree->{'RunCommand'});
+    $ReturnValue = \@{$xmlTree->{'RunCommand'}};
   }
-
+  return($ReturnValue);
 }
 
 
@@ -226,7 +229,11 @@ sub InstCfgLoadInstanceConfiguration {
   #Remember to also generate the global.yaml file.
 
   # Get the file for installation.
-  # TODO C Get the run commands.
+  $refConfHash->{'FileProvidedDuringCloudInit'} = InstCfgGetFileProvidedDuringCloudInit($xmlTree);
+  
+  # Get the run commands.
+  $refConfHash->{'RunCommand'} = InstCfgGetRunCommandsList($xmlTree);
+
   #print Dumper($refConfHash);
   #print "------------------------------------\n";
   #print Dumper($config);

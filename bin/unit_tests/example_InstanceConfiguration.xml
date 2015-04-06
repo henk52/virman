@@ -21,6 +21,18 @@
     <IpAddress>10.1.2.3</IpAddress>
     <NetMask>255.255.255.0</NetMask>
   </VNic>
+  <FileProvidedDuringCloudInit Name="alpha">
+    <SourceFile>alpha.tgz</SourceFile>
+    <SourceType>Base64</SourceType>
+    <DestinationFile>/vagrant/alpha.tgz</DestinationFile>
+  </FileProvidedDuringCloudInit>
+  <FileProvidedDuringCloudInit Name="bravo">
+    <SourceFile>bravo.tgz</SourceFile>
+    <SourceType>Base64</SourceType>
+    <DestinationFile>/vagrant/bravo.tgz</DestinationFile>
+  </FileProvidedDuringCloudInit>
+  <RunCommand>command1</RunCommand>
+  <RunCommand>command2</RunCommand>
   <InstallWrapper>ripwrap</InstallWrapper>
 </VIRMAN_INSTANCE_CONFIGURAITON>
 </xml>
