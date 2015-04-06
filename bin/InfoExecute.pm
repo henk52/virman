@@ -161,10 +161,12 @@ sub IEGenerateCloudInitIsoImage {
   # Add the szPostConfigTgzFile to the list of files to include on the iso.
   CmnAddFileEntry($refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'}, $szPostConfigTgzFile, 'Base64', '/vagrant/tgz_modules/postconfig.tgz');
   
-  if ( ! exists( $hCombinedInstanceAndWrapperConf{'RunCommand'} ) ) {
+  if ( ! exists( $refhCombinedInstanceAndWrapperConf->{'RunCommand'} ) ) {
     # TODO V Unit test this.
-    $hCombinedInstanceAndWrapperConf{'RunCommand'} = [];
+    $refhCombinedInstanceAndWrapperConf->{'RunCommand'} = [];
   }
+  print "DDD in IEGenerateCloudInitIsoImage()\n";
+  print Dumper($refhCombinedInstanceAndWrapperConf);
   
   # Add the command to extract the tgz modules;
   my @arPostConfigCommands = ( 'cd /; tar -zxf /vagrant/tgz_modules/*.tgz', 'puppet apply /etc/puppet/modules/postconfig/tests/init.pp; /sbin/service network start' );

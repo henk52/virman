@@ -82,8 +82,8 @@ if ( ! -f "$szXmlConfigurationFilename" ) {
 my %hInstanceConfiguration;
 print "III Instance source XML file: $szXmlConfigurationFilename\n";
 IGReadInstanceConfiguration(\%hInstanceConfiguration, $szXmlConfigurationFilename);
-#print "DDD hInstanceConfiguration after call to IGReadInstanceConfiguration()\n";
-#print Dumper(\%hInstanceConfiguration);
+print "DDD hInstanceConfiguration after call to IGReadInstanceConfiguration()\n";
+print Dumper(\%hInstanceConfiguration);
 
 # If an install wrapper has been defined then use it.
 if ( exists($hInstanceConfiguration{'InstallWrapper'}) && $hInstanceConfiguration{'InstallWrapper'} ne "" ) {
@@ -93,8 +93,9 @@ if ( exists($hInstanceConfiguration{'InstallWrapper'}) && $hInstanceConfiguratio
   print Dumper(\%hInstallWrapperConfiguration);
   # Merge the InstallWrapper hash and the instance configuration.
   IPMergeInstanceAndWrapperInfo(\%hInstanceConfiguration, \%hInstallWrapperConfiguration);
+  print "DDD hInstanceConfiguration after IPMergeInstanceAndWrapperInfo()\n";
+  print Dumper(\%hInstanceConfiguration);
 }
-
 
 
 
