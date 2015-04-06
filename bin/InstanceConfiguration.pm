@@ -178,15 +178,10 @@ sub InstCfgGetInstallWrapper {
 # TODO Move this to a common pm so that InstallWrapper could also use it.
 sub InstCfgGetRunCommandsList {
   my $xmlTree = shift;
-  confess("!!! the xmlTree(first parm) is not defined.") unless(defined($xmlTree));
-  
-  my @arEmpty= ();
-  my $ReturnValue = \@arEmpty;
-  if ( exists($xmlTree->{'RunCommand'}) ) {
-    #print Dumper($xmlTree->{'RunCommand'});
-    $ReturnValue = \@{$xmlTree->{'RunCommand'}};
-  }
-  return($ReturnValue);
+
+  confess("!!! no XML tree given as a parameter.") unless(defined($xmlTree));
+
+  return(CmnReturnArrayEmptyIfNotExist($xmlTree, 'RunCommand'));
 }
 
 
@@ -234,7 +229,8 @@ sub InstCfgLoadInstanceConfiguration {
   $refConfHash->{'FileProvidedDuringCloudInit'} = \%hFileProvidedDuringCloudInit;
   
   # Get the run commands.
-  $refConfHash->{'RunCommand'} = InstCfgGetRunCommandsList($xmlTree);
+  my @arRunCommandList = InstCfgGetRunCommandsList($xmlTree);
+  $refConfHash->{'RunCommand'} = \@arRunCommandList;
 
   #print Dumper($refConfHash);
   #print "------------------------------------\n";

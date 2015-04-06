@@ -45,7 +45,7 @@ use Data::Dumper;
 
 
 
-$VERSION = 0.1.0;
+$VERSION = 0.2.0;
 @ISA = ('Exporter');
 
 # List the functions and var's that must be available.
@@ -53,6 +53,7 @@ $VERSION = 0.1.0;
 @EXPORT = qw(
                 &CmnAddFileEntry
                 &CmnGetFileProvidedDuringCloudInit
+                &CmnReturnArrayEmptyIfNotExist
             );
 
 
@@ -129,6 +130,34 @@ sub CmnGetFileProvidedDuringCloudInit {
   return(%hConfig);
 } # end CmnGetFileProvidedDuringCloudInit.
 
+# -----------------------------------------------------------------
+#** @function [public|protected|private] [return-type] function-name (parameters)
+# @brief Return en empty array if the entry does not exist in the hash.
+#
+# A detailed description of the function
+# @params xmlTree required
+# @params szTagName required
+# @retval an array.
+# ....
+#*
+# ---------------
+sub CmnReturnArrayEmptyIfNotExist {
+  my $xmlTree = shift;
+  my $szTagName = shift;
+
+  confess("!!! no XML tree given as a parameter.") unless(defined($xmlTree));
+  confess("!!! no tag name given as a parameter two.") unless(defined($szTagName));
+  
+  my @arEmpty= ();
+  my $ReturnValue = \@arEmpty;
+  if ( exists($xmlTree->{$szTagName}) ) {
+    $ReturnValue = \@{$xmlTree->{$szTagName}};
+  }
+  #print "DDD CmnReturnArrayEmptyIfNotExist():\n";
+  #print Dumper($ReturnValue);
+  
+  return(@{$ReturnValue});
+} # end CmnReturnArrayEmptyIfNotExist.
 
 # This ends the perl module/package definition.
 1;

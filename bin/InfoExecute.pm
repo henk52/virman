@@ -173,8 +173,8 @@ sub IEGenerateCloudInitIsoImage {
   # -- the above: service network start is needed if no ipaddr is configured prirp to this line, otherwise it wil fail.
 
   # This will put the arPostConfigCommands as the first two commands, in the order shown above.
-  unshift($hCombinedInstanceAndWrapperConf{'RunCommand'}, @arPostConfigCommands);
-  #push($hCombinedInstanceAndWrapperConf{'RunCommand'}, "cd /; tar -zxf /vagrant/tgz_modules/*.tgz");
+  #print Dumper($refhCombinedInstanceAndWrapperConf->{'RunCommand'});
+  unshift($refhCombinedInstanceAndWrapperConf->{'RunCommand'}, @arPostConfigCommands);
   
   
 
@@ -198,8 +198,8 @@ sub IEGenerateCloudInitIsoImage {
   chomp($szSshPublicKey);
 
   my $szAdminName = 'vagrant';
-  if ( exists( $hCombinedInstanceAndWrapperConf{'NameOfAdminUserAccount'} ) ) {
-    $szAdminName = $hCombinedInstanceAndWrapperConf{'NameOfAdminUserAccount'};
+  if ( exists( $refhCombinedInstanceAndWrapperConf->{'NameOfAdminUserAccount'} ) ) {
+    $szAdminName = $refhCombinedInstanceAndWrapperConf->{'NameOfAdminUserAccount'};
   }
   
     # TODO C This is probably used for getting files like app.zip etc, but where is it used??? FileProvidedDuringCloudInit
@@ -252,9 +252,9 @@ sub IEGenerateCloudInitIsoImage {
     }
     print USERDATA "\n";
   }
-  if ( exists( $hCombinedInstanceAndWrapperConf{'RunCommand'} ) ) {
+  if ( exists( $refhCombinedInstanceAndWrapperConf->{'RunCommand'} ) ) {
     print USERDATA "runcmd:\n";
-    foreach my $szRunCmd ( @{ $hCombinedInstanceAndWrapperConf{'RunCommand'} } ) {
+    foreach my $szRunCmd ( @{ $refhCombinedInstanceAndWrapperConf->{'RunCommand'} } ) {
       if ( ! defined($szRunCmd)) {
         confess("!!! Run command not define.")
       } else {

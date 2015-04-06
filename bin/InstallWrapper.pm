@@ -194,11 +194,13 @@ sub InstWrapGetPostRunCommandList {
   my $xmlTree = shift;
 
   confess("!!! no XML tree given as a parameter.") unless(defined($xmlTree));
-  
-  #print Dumper($xmlTree);
-  
+ 
+  #my $ReturnValue = CmnReturnArrayEmptyIfNotExist($xmlTree, 'PostAppRunCommand');
+  #print "DDD InstWrapGetPostRunCommandList():\n";
+  #print Dumper($ReturnValue);
 
-  return(@{$xmlTree->{'PostAppRunCommand'}});
+  #return( $ReturnValue );
+  return(CmnReturnArrayEmptyIfNotExist($xmlTree, 'PostAppRunCommand'));
 }
 
 # -----------------------------------------------------------------
@@ -214,9 +216,9 @@ sub InstWrapGetPostRunCommandList {
 sub InstWrapGetPreRunCommandList {
   my $xmlTree = shift;
 
-  # TODO Barf if XML tree is undef, or not an XML?
+  confess("!!! no XML tree given as a parameter.") unless(defined($xmlTree));
 
-  return(@{$xmlTree->{'PreAppRunCommand'}});
+  return(CmnReturnArrayEmptyIfNotExist($xmlTree, 'PreAppRunCommand'));
 }
 
 

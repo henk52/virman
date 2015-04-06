@@ -24,7 +24,7 @@ BEGIN {
 
 use Data::Dumper;
 
-use Test::More tests => 7;
+use Test::More tests => 8;
 #use Test::Exception;
 
 # TODO C 'use' the perl module that is to be tested.
@@ -89,4 +89,14 @@ my %ExpectedFileHash = (
                                              }
 
 );
-is_deeply(\%hFileHash, \%ExpectedFileHash, 'Validating InstWrapGetFileProvidedDuringCloudInit().')
+is_deeply(\%hFileHash, \%ExpectedFileHash, 'Validating InstWrapGetFileProvidedDuringCloudInit().');
+
+
+$xmlTree = InstWrapLoadXml("$FindBin::RealBin/example_InstallWrapper_empty.xml");
+my @arExpetedEmptyRunCmdList = ();
+my @arActualEmptyPostRunCmdList = InstWrapGetPostRunCommandList($xmlTree); 
+#print Dumper(\@arExpetedEmptyRunCmdList);
+#print Dumper(@arActualEmptyPostRunCmdList);
+is_deeply(\@arActualEmptyPostRunCmdList, \@arExpetedEmptyRunCmdList, 'InstWrapGetPostRunCommandList() - empty Run command list.');
+
+
