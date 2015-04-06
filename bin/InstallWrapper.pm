@@ -251,6 +251,8 @@ sub InstWrapLoadInstallWrapperConfiguration {
   $refConfHash->{'PostNetworkConfiguration'}     = \%hPostNetworkHash;
 
   my @arPostAppRnCmd = InstWrapGetPostRunCommandList($xmlTree);
+  #print "DDD in InstWrapLoadInstallWrapperConfiguration()\n";
+  #print Dumper(\@arPostAppRnCmd);
   $refConfHash->{'PostAppRunCommand'}     = \@arPostAppRnCmd;
   
   my @arPreAppRnCmd = InstWrapGetPreRunCommandList($xmlTree);
