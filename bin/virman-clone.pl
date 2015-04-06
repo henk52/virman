@@ -81,11 +81,15 @@ if ( ! -f "$szXmlConfigurationFilename" ) {
 
 my %hInstanceConfiguration;
 IGReadInstanceConfiguration(\%hInstanceConfiguration, $szXmlConfigurationFilename);
+print "DDD hInstanceConfiguration after call to IGReadInstanceConfiguration()\n";
+print Dumper(\%hInstanceConfiguration);
 
 # If an install wrapper has been defined then use it.
 if ( exists($hInstanceConfiguration{'InstallWrapper'}) && $hInstanceConfiguration{'InstallWrapper'} ne "" ) {
   my %hInstallWrapperConfiguration;
   InstWrapLoadInstallWrapperConfiguration(\%hInstallWrapperConfiguration, "$f_hVirmanConfiguration{'InstallWrapperPath'}/$hInstanceConfiguration{'InstallWrapper'}.xml");
+  print "DDD hInstallWrapperConfiguration after call to InstWrapLoadInstallWrapperConfiguration()\n";
+  print Dumper(\%hInstallWrapperConfiguration);
   # Merge the InstallWrapper hash and the instance configuration.
   IPMergeInstanceAndWrapperInfo(\%hInstanceConfiguration, \%hInstallWrapperConfiguration);
 }

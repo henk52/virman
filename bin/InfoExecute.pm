@@ -253,7 +253,11 @@ sub IEGenerateCloudInitIsoImage {
   if ( exists( $hCombinedInstanceAndWrapperConf{'RunCommand'} ) ) {
     print USERDATA "runcmd:\n";
     foreach my $szRunCmd ( @{ $hCombinedInstanceAndWrapperConf{'RunCommand'} } ) {
-      print USERDATA "  - $szRunCmd\n";
+      if ( ! defined($szRunCmd)) {
+        confess("!!! Run command not define.")
+      } else {
+        print USERDATA "  - $szRunCmd\n";        
+      }
     }
     print USERDATA "\n";
   }
