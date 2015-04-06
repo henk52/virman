@@ -180,7 +180,8 @@ sub InstCfgGetRunCommandsList {
   my $xmlTree = shift;
   confess("!!! the xmlTree(first parm) is not defined.") unless(defined($xmlTree));
   
-  my $ReturnValue;
+  my @arEmpty= ();
+  my $ReturnValue = \@arEmpty;
   if ( exists($xmlTree->{'RunCommand'}) ) {
     #print Dumper($xmlTree->{'RunCommand'});
     $ReturnValue = \@{$xmlTree->{'RunCommand'}};
