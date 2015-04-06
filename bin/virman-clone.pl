@@ -80,9 +80,10 @@ if ( ! -f "$szXmlConfigurationFilename" ) {
 }
 
 my %hInstanceConfiguration;
+print "III Instance source XML file: $szXmlConfigurationFilename\n";
 IGReadInstanceConfiguration(\%hInstanceConfiguration, $szXmlConfigurationFilename);
-print "DDD hInstanceConfiguration after call to IGReadInstanceConfiguration()\n";
-print Dumper(\%hInstanceConfiguration);
+#print "DDD hInstanceConfiguration after call to IGReadInstanceConfiguration()\n";
+#print Dumper(\%hInstanceConfiguration);
 
 # If an install wrapper has been defined then use it.
 if ( exists($hInstanceConfiguration{'InstallWrapper'}) && $hInstanceConfiguration{'InstallWrapper'} ne "" ) {

@@ -230,7 +230,8 @@ sub InstCfgLoadInstanceConfiguration {
   #Remember to also generate the global.yaml file.
 
   # Get the file for installation.
-  $refConfHash->{'FileProvidedDuringCloudInit'} = InstCfgGetFileProvidedDuringCloudInit($xmlTree);
+  my %hFileProvidedDuringCloudInit = InstCfgGetFileProvidedDuringCloudInit($xmlTree);
+  $refConfHash->{'FileProvidedDuringCloudInit'} = \%hFileProvidedDuringCloudInit;
   
   # Get the run commands.
   $refConfHash->{'RunCommand'} = InstCfgGetRunCommandsList($xmlTree);
