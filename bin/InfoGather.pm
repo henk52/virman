@@ -48,7 +48,7 @@ use InstanceConfiguration;
 
 
 
-$VERSION = 0.1.1;
+$VERSION = 0.2.0;
 @ISA = ('Exporter');
 
 # List the functions and var's that must be available.
@@ -126,33 +126,8 @@ sub IGReadInstanceConfiguration {
   my $refConfHash = shift;
   my $szFileName = shift;
 
-  # TODO verify the XML file exists.
-  my $xmlTree = InstCfgLoadXml($szFileName);
-
-  $refConfHash->{'Description'} = GetDescription($xmlTree);
-  $refConfHash->{'BaseDomainName'} = GetBaseDomainName($xmlTree);
-  $refConfHash->{'NameOfAdminUserAccount'}   = GetNameOfAdminUserAccount($xmlTree);
-
-  # TODO V only read it if it is defined?
-  $refConfHash->{'InstallWrapper'} = InstCfgGetInstallWrapper($xmlTree);
-
-  #print Dumper($xmlTree);
-  my %hNetworkConfiguration = InstCfgGetNetworkHash($xmlTree);
-
-  #print Dumper(\%hNetworkConfiguration);
-
-  $refConfHash->{'NetworkConfiguration'} = \%hNetworkConfiguration;
-
-  # TODO C Also provide functions: GetBaseDomainNameIfAvailable, where it is:
-  # GetBaseDomainNameIfAvailable($xmlTree, $refConfHash->{'BaseDomainName'});
-  # where the hash ref will be set if the data is available. Can I do it like this or would it have to be:
-  # GetBaseDomainNameIfAvailable($xmlTree, $refConfHash, 'BaseDomainName');
-
-
-  # Get the file for installation.
-  my @arRunCommands = InstCfgGetRunCommandsList($xmlTree);
-  $refConfHash->{'RunCommand'} = \@arRunCommands;
-}
+  InstCfgLoadInstanceConfiguration($refConfHash, $szFileName);
+} # end IGReadInstanceConfiguration.
 
 
 # This ends the perl module/package definition.
