@@ -27,7 +27,7 @@
   <FileProvidedDuringCloudInit Name="bravo">
     <SourceFile>bravo.tgz</SourceFile>
     <SourceType>Base64</SourceType>
-    <DestinationFile>/vagrant/bravo.tgz</DestinationFile>
+    <DestinationFile>/vagrant/InstallWrapper_bravo.tgz</DestinationFile>
   </FileProvidedDuringCloudInit>
   <PreAppRunCommand>pre one</PreAppRunCommand>
   <PreAppRunCommand>pre two</PreAppRunCommand>

@@ -88,7 +88,7 @@ my %ExpectedFileHash = (
                        'DestinationFile' => '/etc/puppet/data/global.yaml'
                       },
        'bravo.tgz' => {
-                       'DestinationFile' => '/vagrant/bravo.tgz',
+                       'DestinationFile' => '/vagrant/InstallWrapper_bravo.tgz',
                        'SourceType' => 'Base64'
                        }
 );
@@ -113,7 +113,7 @@ my %hExpectedFullWrapperConf = (
                                                                                   'SourceType' => 'base64'
                                                                                 },
                                              'bravo.tgz' => {
-                                                            'DestinationFile' => '/vagrant/bravo.tgz',
+                                                            'DestinationFile' => '/vagrant/InstallWrapper_bravo.tgz',
                                                             'SourceType' => 'Base64'
                                                           }
                                            },

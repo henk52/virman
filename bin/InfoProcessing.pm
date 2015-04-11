@@ -45,7 +45,7 @@ use Data::Dumper;
 
 
 
-$VERSION = 0.1.0;
+$VERSION = 0.1.2;
 @ISA = ('Exporter');
 
 # List the functions and var's that must be available.
@@ -70,7 +70,10 @@ $VERSION = 0.1.0;
 # -----------------------------------------------------------------
 #** @function public IPMergeInstanceAndWrapperInfo
 # @brief Merge the Instance info and the, optional, install wrapper information.
+#   The merged data is available in the $refhInstanceConfiguration.
 #
+# The section: FileProvidedDuringCloudInit will be merged and the InstallWrapper
+#   configuration takes precedence to the Instance configuration.
 # 
 # @params refhVirmanConfiguration required The Virman configuration Hash.
 # @params refhInstallWrapperConfiguration required The install wrapper data hash.
@@ -126,6 +129,9 @@ sub IPMergeInstanceAndWrapperInfo {
   
   #print Dumper($refhInstanceConfiguration->{'NetworkConfiguration'});
 
+  foreach my $szFileKey (keys  $refhInstallWrapperConfiguration->{'FileProvidedDuringCloudInit'}) {
+    $refhInstanceConfiguration->{'FileProvidedDuringCloudInit'}{$szFileKey} = $refhInstallWrapperConfiguration->{'FileProvidedDuringCloudInit'}{$szFileKey};
+  }
   #die("!!! Hey look here....");  
 } # end IPMergeInstanceAndWrapperInfo
 

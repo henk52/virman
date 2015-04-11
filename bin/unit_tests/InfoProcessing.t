@@ -78,35 +78,60 @@ my %hInstallWrapperConfiguration;
 InstWrapLoadInstallWrapperConfiguration(\%hInstallWrapperConfiguration, "unit_tests/example_InstallWrapper.xml");
 
 IPMergeInstanceAndWrapperInfo(\%hInstanceConfiguration, \%hInstallWrapperConfiguration);
-my %hMergedNetworks = (
-          '0' => {
-                 'AutoAssignement' => 'dhcp',
-                 'Name' => 'pre0'
-               },
-          '1' => {
-                   'AutoAssignement' => 'dhcp',
-                   'Name' => 'inst0'
-                 },
-          '2' => {
-                   'Name' => 'inst1',
-                   'AutoAssignement' => 'dhcp'
-                 },
-          '3' => {
-                   'Name' => 'inst2'
-                 },
-          '4' => {
-                   'Name' => 'fix1',
-                   'AutoAssignement' => 'static',
-                   'IpAddress' => '10.1.2.3',
-                   'NetMask' => '255.255.255.0'
-                 },
-          '5' => {
-                   'AutoAssignement' => 'dhcp',
-                   'Name' => 'post0'
-                 },
-          '6' => {
-                   'AutoAssignement' => 'dhcp',
-                   'Name' => 'post1'
-                 }
+my %hMergedConfigs = (
+ 'InstallWrapper' => 'ripwrap',
+          'NameOfAdminUserAccount' => 'vagrant',
+          'RunCommand' => [
+                            'command1',
+                            'command2'
+                          ],
+          'NetworkConfiguration' => {
+                                      '3' => {
+                                               'Name' => 'inst2'
+                                             },
+                                      '2' => {
+                                               'AutoAssignement' => 'dhcp',
+                                               'Name' => 'inst1'
+                                             },
+                                      '1' => {
+                                               'Name' => 'inst0',
+                                               'AutoAssignement' => 'dhcp'
+                                             },
+                                      '5' => {
+                                               'Name' => 'post0',
+                                               'AutoAssignement' => 'dhcp'
+                                             },
+                                      '4' => {
+                                               'AutoAssignement' => 'static',
+                                               'NetMask' => '255.255.255.0',
+                                               'IpAddress' => '10.1.2.3',
+                                               'Name' => 'fix1'
+                                             },
+                                      '6' => {
+                                               'AutoAssignement' => 'dhcp',
+                                               'Name' => 'post1'
+                                             },
+                                      '0' => {
+                                             'AutoAssignement' => 'dhcp',
+                                             'Name' => 'pre0'
+                                           }
+                                    },
+          'Description' => 'Monitor machine',
+          'BaseDomainName' => 'rhel63_x86_64',
+          'FileProvidedDuringCloudInit' => {
+                                             'bravo.tgz' => {
+                                                            'DestinationFile' => '/vagrant/InstallWrapper_bravo.tgz',
+                                                            'SourceType' => 'Base64'
+                                                          },
+                                             '/var/virman/vrouter/global.yaml' => {
+                                                                                  'SourceType' => 'base64',
+                                                                                  'DestinationFile' => '/etc/puppet/data/global.yaml'
+                                                                                },
+                                             'alpha.tgz' => {
+                                                            'SourceType' => 'Base64',
+                                                            'DestinationFile' => '/vagrant/alpha.tgz'
+                                                          }
+                                           }
 );
-is_deeply($hInstanceConfiguration{'NetworkConfiguration'}, \%hMergedNetworks, 'InstWrapLoadInstallWrapperConfiguration(): Merged networks.');
+#print Dumper(\%hInstanceConfiguration);
+is_deeply(\%hInstanceConfiguration, \%hMergedConfigs, 'IPMergeInstanceAndWrapperInfo()');
