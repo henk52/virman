@@ -24,7 +24,7 @@ BEGIN {
 
 use Data::Dumper;
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 #use Test::Exception;
 
 # TODO C 'use' the perl module that is to be tested.
@@ -83,11 +83,14 @@ is_deeply(\%hActualNetworkConfiguration, \%ExpectedPostNetworkConfiguration, 'In
 my %hFileHash = InstWrapGetFileProvidedDuringCloudInit($xmlTree);
 
 my %ExpectedFileHash = (
- '/var/virman/vrouter/global.yaml' => {
-                                               'SourceType' => 'base64',
-                                               'DestinationFile' => '/etc/puppet/data/global.yaml'
-                                             }
-
+       '/var/virman/vrouter/global.yaml' => {
+                       'SourceType' => 'base64',
+                       'DestinationFile' => '/etc/puppet/data/global.yaml'
+                      },
+       'bravo.tgz' => {
+                       'DestinationFile' => '/vagrant/bravo.tgz',
+                       'SourceType' => 'Base64'
+                       }
 );
 is_deeply(\%hFileHash, \%ExpectedFileHash, 'Validating InstWrapGetFileProvidedDuringCloudInit().');
 
@@ -99,4 +102,48 @@ my @arActualEmptyPostRunCmdList = InstWrapGetPostRunCommandList($xmlTree);
 #print Dumper(@arActualEmptyPostRunCmdList);
 is_deeply(\@arActualEmptyPostRunCmdList, \@arExpetedEmptyRunCmdList, 'InstWrapGetPostRunCommandList() - empty Run command list.');
 
+
+my %hFullWrapperConf;
+
+my %hExpectedFullWrapperConf = (
+'Note' => 'Just a note.',
+          'FileProvidedDuringCloudInit' => {
+                                             '/var/virman/vrouter/global.yaml' => {
+                                                                                  'DestinationFile' => '/etc/puppet/data/global.yaml',
+                                                                                  'SourceType' => 'base64'
+                                                                                },
+                                             'bravo.tgz' => {
+                                                            'DestinationFile' => '/vagrant/bravo.tgz',
+                                                            'SourceType' => 'Base64'
+                                                          }
+                                           },
+          'PostNetworkConfiguration' => {
+                                          '1' => {
+                                                 'Name' => 'post1',
+                                                 'AutoAssignement' => 'dhcp'
+                                               },
+                                          '0' => {
+                                                 'AutoAssignement' => 'dhcp',
+                                                 'Name' => 'post0'
+                                               }
+                                        },
+          'PostAppRunCommand' => [
+                                   'post one',
+                                   'post two'
+                                 ],
+          'PreNetworkConfiguration' => {
+                                         '0' => {
+                                                'Name' => 'pre0',
+                                                'AutoAssignement' => 'dhcp'
+                                              }
+                                       },
+          'PreAppRunCommands' => [
+                                   'pre one',
+                                   'pre two'
+                                 ]
+
+                                            );
+
+InstWrapLoadInstallWrapperConfiguration(\%hFullWrapperConf, "$FindBin::RealBin/example_InstallWrapper.xml");
+is_deeply(\%hFullWrapperConf, \%hExpectedFullWrapperConf, 'InstWrapLoadInstallWrapperConfiguration()');
 

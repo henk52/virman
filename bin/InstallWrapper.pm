@@ -259,6 +259,11 @@ sub InstWrapLoadInstallWrapperConfiguration {
   $refConfHash->{'PreAppRunCommands'}     = \@arPreAppRnCmd;
   #$refConfHash->{''}     = ($xmlTree);
 
+  # Get the file for installation.
+  #my %hFileProvidedDuringCloudInit = InstWrapGetFileProvidedDuringCloudInit($xmlTree);
+  my %hFileProvidedDuringCloudInit = CmnGetFileProvidedDuringCloudInit($xmlTree);
+  $refConfHash->{'FileProvidedDuringCloudInit'} = \%hFileProvidedDuringCloudInit;
+
   #print Dumper($refConfHash);
   #die("!!! test end.");
 }

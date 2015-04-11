@@ -24,6 +24,11 @@
     <SourceType>base64</SourceType>
     <DestinationFile>/etc/puppet/data/global.yaml</DestinationFile>
   </FileProvidedDuringCloudInit>
+  <FileProvidedDuringCloudInit Name="bravo">
+    <SourceFile>bravo.tgz</SourceFile>
+    <SourceType>Base64</SourceType>
+    <DestinationFile>/vagrant/bravo.tgz</DestinationFile>
+  </FileProvidedDuringCloudInit>
   <PreAppRunCommand>pre one</PreAppRunCommand>
   <PreAppRunCommand>pre two</PreAppRunCommand>
   <PostAppRunCommand>post one</PostAppRunCommand>
