@@ -45,7 +45,7 @@ use Data::Dumper;
 
 
 
-$VERSION = 0.1.2;
+$VERSION = 0.1.3;
 @ISA = ('Exporter');
 
 # List the functions and var's that must be available.
@@ -89,8 +89,8 @@ sub IPMergeInstanceAndWrapperInfo {
   #print Dumper($refhInstanceConfiguration);
 
 
-  #print "--- refhInstallWrapperConfiguration\n";
-  #print Dumper($refhInstallWrapperConfiguration);
+  print "--- refhInstallWrapperConfiguration\n";
+  print Dumper($refhInstallWrapperConfiguration);
 
   # Get length of pre list.
   my @arInstWrapPreNetworkKeys = sort(keys  $refhInstallWrapperConfiguration->{'PreNetworkConfiguration'});
@@ -131,6 +131,17 @@ sub IPMergeInstanceAndWrapperInfo {
 
   foreach my $szFileKey (keys  $refhInstallWrapperConfiguration->{'FileProvidedDuringCloudInit'}) {
     $refhInstanceConfiguration->{'FileProvidedDuringCloudInit'}{$szFileKey} = $refhInstallWrapperConfiguration->{'FileProvidedDuringCloudInit'}{$szFileKey};
+  }
+  
+  if ( exists ($refhInstallWrapperConfiguration->{'PreAppRunCommand'}) ) {
+    foreach my $szEntry (reverse(@{$refhInstallWrapperConfiguration->{'PreAppRunCommand'}}) ) {
+      unshift($refhInstanceConfiguration->{'RunCommand'}, $szEntry);
+    }
+  }
+  if ( exists ($refhInstallWrapperConfiguration->{'PostAppRunCommand'}) ) {
+    foreach my $szEntry ( @{$refhInstallWrapperConfiguration->{'PostAppRunCommand'}}  ) {
+      push($refhInstanceConfiguration->{'RunCommand'}, $szEntry);
+    }
   }
   #die("!!! Hey look here....");  
 } # end IPMergeInstanceAndWrapperInfo

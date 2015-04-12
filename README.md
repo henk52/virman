@@ -14,13 +14,19 @@ Delete the image box
 Create the base image 'rhel63_x86_64' used by e.g. 'box'
 virt-install --name rhel63_x86_64 --memory 768 --disk "pool=qcows,bus=virtio,size=10" --vcpus 1 --location http://169.254.0.3/images/rhel_63_x86_64 --graphics none --extra-args="acpi=on console=tty0 console=ttyS0,115200 ks=http://169.254.0.3/configs/ks_rhel-63-x86_64_http_kvm_guest.cfg" --network bridge:virbrconf
 
-# Remove the udev network rules and the ifcfg.
-#  Add --dryrun --verbose to just test it.
-virt-sysprep --enable udev-persistent-net --delete /etc/sysconfig/network-scripts/ifcfg-eth0 -a /virt_images/rhel63_x86_64.qcow2
+* Remove the udev network rules and the ifcfg.
+*  Add --dryrun --verbose to just test it.
+* --enable 'customize' to enable --delete
 
+virt-sysprep  --enable udev-persistent-net,customize --delete /etc/sysconfig/network-scripts/ifcfg-eth0 -a /virt_images/rhel63_x86_64.qcow2 
+
+/opt/virman/bin/virman-clone.pl  tip
+ssh -i /var/virman/.ssh/virman -l vagrant 169.254.0.8
+/opt/virman/bin/virman-delete.pl  tip
 
 #TODO Do the Network merge for the IPMergeInstanceAndWrapperInfo
 TODO Do the Run command merge for IPMergeInstanceAndWrapperInfo
+TODO V gracefully handle empty tags, like <RunCommand></RunCommand>, currently it becomes a hash, it should just be an empty string.
 TODO Read the install wrapper, if the app references one.
   - GetVNics
   - GetFileProvided
@@ -33,7 +39,8 @@ TODO Merge the data from the install wrapper with the Instance data
 TODO get the 'configuration' network to work.
 TODO get the app files added.
 TODO install the app (files)
-TODO How do I handle if I call virtman-clone.pl in parralele, and postconfig isn't created.
+TODO How do I handle if I call virtman-clone.pl in parallel, and postconfig isn't created.
+TODO How should it be handled if the wrapper or app instance also provides a 'global.yaml' file?
 
 TODO make virman-clone.pl support multiple roles
   verify that the role exists
@@ -56,3 +63,120 @@ There are a number of hashes being used:
 ** 
 ** 
 ** 
+
+
+# Trouble shooting
+
+
+#### runcmd has a '  - HASH(0x1cd7940)' as a command entry.
+
+Either your install wrapper xml or your instance source configuration xml file has an <RunCommand></RundCommand>
+Where there is no commands in it. 
+
+
+#### Error: /Stage[main]/Network/Service[network]: Could not evaluate: No child processes
+
+puppet apply tst.pp 
+Could not retrieve fact='ipaddress', resolution='<anonymous>': Network is unreachable - connect(2)
+Timed out after 2 seconds while resolving fact='ipaddress', resolution='<anonymous>'
+Could not retrieve fact='ipaddress', resolution='<anonymous>': Network is unreachable - connect(2)
+Timed out after 2 seconds while resolving fact='ipaddress', resolution='<anonymous>'
+Could not retrieve fact='ipaddress', resolution='<anonymous>': Network is unreachable - connect(2)
+Timed out after 2 seconds while resolving fact='ipaddress', resolution='<anonymous>'
+Warning: Could not retrieve fact ipaddress
+Notice: Compiled catalog for test-001 in environment production in 0.49 seconds
+Notice: /Stage[main]/Main/Network::If::Dynamic[eth1]/Network_if_base[eth1]/File[ifcfg-eth1]/ensure: created
+Error: /Stage[main]/Network/Service[network]: Could not evaluate: No child processes
+Error: /Stage[main]/Network/Service[network]: Failed to call refresh: No child processes
+Error: /Stage[main]/Network/Service[network]: No child processes
+Notice: Finished catalog run in 1.09 seconds
+
+
+puppet apply /etc/puppet/modules/postconfig/tests/init.pp 
+Could not retrieve fact='ipaddress', resolution='<anonymous>': Network is unreachable - connect(2)
+Timed out after 2 seconds while resolving fact='ipaddress', resolution='<anonymous>'
+Could not retrieve fact='ipaddress', resolution='<anonymous>': Network is unreachable - connect(2)
+Timed out after 2 seconds while resolving fact='ipaddress', resolution='<anonymous>'
+Could not retrieve fact='ipaddress', resolution='<anonymous>': Network is unreachable - connect(2)
+Timed out after 2 seconds while resolving fact='ipaddress', resolution='<anonymous>'
+Warning: Could not retrieve fact ipaddress
+Notice: Compiled catalog for tip-001 in environment production in 0.60 seconds
+Error: /Stage[main]/Network/Service[network]: Could not evaluate: No child processes
+Notice: Finished catalog run in 0.36 seconds
+
+
+Debug: /File[/var/lib/puppet/state/last_run_report.yaml]: Autorequiring File[/var/lib/puppet/state]
+Debug: /File[/var/lib/puppet/state/last_run_summary.yaml]: Autorequiring File[/var/lib/puppet/state]
+Debug: /File[/var/lib/puppet/state/state.yaml]: Autorequiring File[/var/lib/puppet/state]
+Debug: /File[/var/lib/puppet/ssl]: Autorequiring File[/var/lib/puppet]
+Debug: /File[/var/lib/puppet/ssl/private_keys]: Autorequiring File[/var/lib/puppet/ssl]
+Debug: /File[/var/lib/puppet/ssl/private]: Autorequiring File[/var/lib/puppet/ssl]
+Debug: /File[/var/lib/puppet/facts.d]: Autorequiring File[/var/lib/puppet]
+Debug: /File[/var/lib/puppet/ssl/certs]: Autorequiring File[/var/lib/puppet/ssl]
+Debug: /File[/var/lib/puppet/state/graphs]: Autorequiring File[/var/lib/puppet/state]
+Debug: /File[/var/lib/puppet/clientbucket]: Autorequiring File[/var/lib/puppet]
+Debug: /File[/var/lib/puppet/lib]: Autorequiring File[/var/lib/puppet]
+Debug: /File[/var/lib/puppet/client_data]: Autorequiring File[/var/lib/puppet]
+Debug: /File[/var/lib/puppet/state]: Autorequiring File[/var/lib/puppet]
+Debug: /File[/etc/puppet/hiera.yaml]: Autorequiring File[/etc/puppet]
+Debug: /File[/var/lib/puppet/ssl/public_keys]: Autorequiring File[/var/lib/puppet/ssl]
+Debug: /File[/var/lib/puppet/client_yaml]: Autorequiring File[/var/lib/puppet]
+Debug: /File[/var/lib/puppet/ssl/certificate_requests]: Autorequiring File[/var/lib/puppet/ssl]
+Debug: Finishing transaction 70027854154280
+Debug: Loaded state in 0.00 seconds
+Debug: Loaded state in 0.00 seconds
+Info: Applying configuration version '1427949903'
+Debug: Executing '/sbin/service network status'
+Error: /Stage[main]/Main/Service[network]: Could not evaluate: No child processes
+Debug: Finishing transaction 70027853754660
+Debug: Storing state
+Debug: Stored state in 0.14 seconds
+Notice: Finished catalog run in 0.37 seconds
+Debug: Using settings: adding file resource 'rrddir': 'File[/var/lib/puppet/rrd]{:backup=>false, :group=>"puppet", :loglevel=>:debug, :ensure=>:directory, :owner=>"puppet", :links=>:follow, :mode=>"750", :path=>"/var/lib/puppet/rrd"}'
+Debug: Finishing transaction 70027853575640
+Debug: Received report to process from tip-001
+Debug: Processing report from tip-001 with processor Puppet::Reports::Store
+
+Fix:
+service network start
+
+
+#### Error: can't convert String into Hash at /etc/puppet/modules/postconfig/manifests/init.pp:65 on node test-001
+See: http://stackoverflow.com/questions/25973819/create-resources-cant-convert-string-into-hash
+
+Error: can't convert String into Hash at /etc/puppet/modules/postconfig/manifests/init.pp:65 on node tip-001
+Wrapped exception:
+can't convert String into Hash
+Error: can't convert String into Hash at /etc/puppet/modules/postconfig/manifests/init.pp:65 on node tip-001
+
+
+
+#### util.py[WARNING]: Running users-groups (<module 'cloudinit.config.cc_users_groups' from '/usr/lib/python2.6/site-packages/cloudinit/config/cc_users_groups.pyc'>) failed
+
+
+REQUEST: 
+Hi
+
+Any idea of how I can troubleshoot the following:
+puppet apply tst.pp 
+---
+Could not retrieve fact='ipaddress', resolution='<anonymous>': Network is unreachable - connect(2)
+Timed out after 2 seconds while resolving fact='ipaddress', resolution='<anonymous>'
+Could not retrieve fact='ipaddress', resolution='<anonymous>': Network is unreachable - connect(2)
+Timed out after 2 seconds while resolving fact='ipaddress', resolution='<anonymous>'
+Could not retrieve fact='ipaddress', resolution='<anonymous>': Network is unreachable - connect(2)
+Timed out after 2 seconds while resolving fact='ipaddress', resolution='<anonymous>'
+Warning: Could not retrieve fact ipaddress
+Notice: Compiled catalog for test-001 in environment production in 0.49 seconds
+Notice: /Stage[main]/Main/Network::If::Dynamic[eth1]/Network_if_base[eth1]/File[ifcfg-eth1]/ensure: created
+Error: /Stage[main]/Network/Service[network]: Could not evaluate: No child processes
+Error: /Stage[main]/Network/Service[network]: Failed to call refresh: No child processes
+Error: /Stage[main]/Network/Service[network]: No child processes
+Notice: Finished catalog run in 1.09 seconds
+---
+
+I'm running this on a rhel63 instance under KVM.
+There are 5 NICs in the intance, none of them have been configured yet.
+
+puppet --version : 3.7.1
+

@@ -78,12 +78,16 @@ my %hInstallWrapperConfiguration;
 InstWrapLoadInstallWrapperConfiguration(\%hInstallWrapperConfiguration, "unit_tests/example_InstallWrapper.xml");
 
 IPMergeInstanceAndWrapperInfo(\%hInstanceConfiguration, \%hInstallWrapperConfiguration);
-my %hMergedConfigs = (
+my %hExpectedMergedConfigs = (
  'InstallWrapper' => 'ripwrap',
           'NameOfAdminUserAccount' => 'vagrant',
           'RunCommand' => [
+                            'pre one',
+                            'pre two',
                             'command1',
-                            'command2'
+                            'command2',
+                            'post one',
+                            'post two'
                           ],
           'NetworkConfiguration' => {
                                       '3' => {
@@ -134,4 +138,4 @@ my %hMergedConfigs = (
                                            }
 );
 #print Dumper(\%hInstanceConfiguration);
-is_deeply(\%hInstanceConfiguration, \%hMergedConfigs, 'IPMergeInstanceAndWrapperInfo()');
+is_deeply(\%hInstanceConfiguration, \%hExpectedMergedConfigs, 'IPMergeInstanceAndWrapperInfo()');

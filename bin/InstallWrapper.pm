@@ -48,7 +48,7 @@ use XML::Simple;
 use Common;
 
 
-$VERSION = 0.1.0;
+$VERSION = 0.1.1;
 @ISA = ('Exporter');
 
 # List the functions and var's that must be available.
@@ -256,7 +256,7 @@ sub InstWrapLoadInstallWrapperConfiguration {
   $refConfHash->{'PostAppRunCommand'}     = \@arPostAppRnCmd;
   
   my @arPreAppRnCmd = InstWrapGetPreRunCommandList($xmlTree);
-  $refConfHash->{'PreAppRunCommands'}     = \@arPreAppRnCmd;
+  $refConfHash->{'PreAppRunCommand'}     = \@arPreAppRnCmd;
   #$refConfHash->{''}     = ($xmlTree);
 
   # Get the file for installation.
