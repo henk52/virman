@@ -236,6 +236,7 @@ sub IEGenerateCloudInitIsoImage {
     #print Dumper($refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'});
     print USERDATA "write_files:\n";
     foreach my $szSourceFile ( keys  $refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'}  ) {
+      confess("!!! file does not exist: $szSourceFile") unless(-f $szSourceFile);
       print USERDATA "  - path: $refhCombinedInstanceAndWrapperConf->{'FileProvidedDuringCloudInit'}{$szSourceFile}{'DestinationFile'}\n";
       print USERDATA "    permissions: 0644\n";
       print USERDATA "    owner: root\n";

@@ -13,15 +13,15 @@ $szVirmanVarDir            = hiera('VirmanVarDir', '/var/virman')
 $szVirmanBaseStorageDir    = hiera('VirmanBaseStorageDir', '/var/virman/basestorage')
 $szVirmanInstanceCfgDir    = hiera('VirmanInstanceCfgDir', '/var/virman/instanceconfigs')
 $szVirmanSshDir            = hiera('VirmanSshDir', '/var/virman/.ssh' )
-$szVirmanCloudInitIsoFiles = hiera('VirmanCloudInitIsoFilesDir', '/var/virman/cloud_init_iso_files')
 $szVirmanInstallWrapperDir = hiera('VirmanInstallWrapperDir', '/var/virman/install_wrappers')
 $szVirmanQcowFilePoolPath  = hiera('VirmanQcowFilePoolPath', '/virt_images')
+$szVirmanCloudInitIsoFilesDir = hiera('VirmanCloudInitIsoFilesDir', '/var/virman/cloud_init_iso_files')
 
 
 file { "$szVirmanVarDir": ensure => directory }
 file { "$szVirmanBaseStorageDir": ensure => directory, require => File [ "$szVirmanVarDir" ] }
 file { "$szVirmanInstanceCfgDir": ensure => directory, require => File [ "$szVirmanVarDir" ] }
-file { "$szVirmanCloudInitIsoFiles": ensure => directory, require => File [ "$szVirmanVarDir" ] }
+file { "$szVirmanCloudInitIsoFilesDir": ensure => directory, require => File [ "$szVirmanVarDir" ] }
 file { "$szVirmanInstallWrapperDir": ensure => directory, require => File [ "$szVirmanVarDir" ] }
 
 file { "$szVirmanSshDir":
