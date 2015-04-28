@@ -20,6 +20,12 @@ virt-install --name rhel63_x86_64 --memory 768 --disk "pool=qcows,bus=virtio,siz
 
 virt-sysprep  --enable udev-persistent-net,customize --delete /etc/sysconfig/network-scripts/ifcfg-eth0 -a /virt_images/rhel63_x86_64.qcow2 
 
+
+# Fedora 20 base machine:
+virt-install --name fedora20_x86_64 --memory 768 --disk "pool=qcows,bus=virtio,size=10" --vcpus 1 --location http://10.1.233.3/images/linux/releases/20/Fedora/x86_64/os --graphics none --extra-args="acpi=on console=tty0 console=ttyS0,115200 ks=http://10.1.233.3/configs/ks_fedora-20-x86_64_http_kvm_guest.cfg" --network bridge:virbr0
+
+#virt-install --name fedora20_x86_64 --memory 768 --disk "pool=qcows,bus=virtio,size=10" --vcpus 1 --location http://10.1.233.3/images/linux/releases/20/Fedora/x86_64/os --graphics none --extra-args="acpi=on console=tty0 console=ttyS0,115200 ks=http://10.1.233.3/configs/ks_fedora-20-x86_64_http_kvm_guest.cfg" --network bridge:virbrconf
+
 /opt/virman/bin/virman-clone.pl  tip
 ssh -i /var/virman/.ssh/virman -l vagrant 169.254.0.8
 /opt/virman/bin/virman-delete.pl  tip
