@@ -24,7 +24,7 @@ BEGIN {
 
 use Data::Dumper;
 
-use Test::More tests => 1;
+use Test::More tests => 2;
 #use Test::Exception;
 
 # the perl module that is to be tested.
@@ -75,7 +75,6 @@ my %hExpectedYamlNicConfig = (
                                             'nic_name' => 'eth1'
                                           }
                              );
-print Dumper($yaml);
 
 is_deeply(@{$yaml}[0]->{'dynamicnetconfig'}, \%hExpectedYamlNicConfig, 'Validate GYUpdateNetworkCfg()');
 
@@ -84,3 +83,14 @@ is_deeply(@{$yaml}[0]->{'dynamicnetconfig'}, \%hExpectedYamlNicConfig, 'Validate
 unlink($szTestYamlFileName);
 
 # TODO Test with netconfig hash not there.
+
+my %hKeyValuePair = (
+  'ApplicationName' => 'Test1',
+  'InstallFile'     => 'myapp.zip'
+);
+
+GYUpdateScalar($szTestYamlFileName, \%hKeyValuePair);
+$yaml = YAML::Tiny->read( $szTestYamlFileName );
+is_deeply($yaml->[0], \%hKeyValuePair, 'Validating GYUpdateScalar()');
+#print Dumper($yaml);
+unlink($szTestYamlFileName);

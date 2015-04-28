@@ -137,7 +137,7 @@ my %hExpectedFullWrapperConf = (
                                                 'AutoAssignement' => 'dhcp'
                                               }
                                        },
-          'PreAppRunCommands' => [
+          'PreAppRunCommand' => [
                                    'pre one',
                                    'pre two'
                                  ]
