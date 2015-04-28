@@ -45,13 +45,14 @@ use Data::Dumper;
 
 use YAML::Tiny;
 
-$VERSION = 0.2.0;
+$VERSION = 0.3.0;
 @ISA     = ('Exporter');
 
 # List the functions and var's that must be available.
 # If you want to create a global var, create it as 'our'
 @EXPORT = qw(
   &GYUpdateNetworkCfg
+  &GYUpdateScalar
 );
 
 # ==============================================================================
@@ -143,6 +144,47 @@ sub GYUpdateNetworkCfg {
   $yaml->write($szYamlFileName);
 
   #die("XXX END TEST");
+}
+
+# -----------------------------------------------------------------
+#** @function [public|protected|private] [return-type] function-name (parameters)
+# @brief A brief description of the function
+#
+# This will write the given values.
+#  The values are given as a hash, but it is just a key/value list, that is added to the file.
+# @params value [required|optional] [details]
+# @retval value [details]
+# ....
+#*
+# ---------------
+sub GYUpdateScalar {
+  my $szYamlFileName   = shift;
+  my $refhKeyValueList = shift;
+  
+  die("!!! Filename is not given.") unless ( defined($szYamlFileName) );
+  die("!!! network config hash not provided.") unless ( defined($refhKeyValueList) );
+
+  my $pYamlFileHandle;
+  my $yaml;
+
+  if ( !-f $szYamlFileName ) {
+    #open($pYamlFileHandle, ">$szYamlFileName") || die("!!! could not open file for write: $szYamlFileName - $!");
+    $yaml = YAML::Tiny->new();
+  } else {
+    #open($pYamlFileHandle, "$szYamlFileName") || die("!!! could not open file for read/write: $szYamlFileName - $!");
+    $yaml = YAML::Tiny->read($szYamlFileName);
+  }
+  
+  
+  # TODO Itterate through the list and add the values to the YAML file.
+  foreach my $szKey (keys $refhKeyValueList) {
+    $yaml->[0]->{"$szKey"} = "$refhKeyValueList->{$szKey}";
+  }
+  
+  
+  # Save the document back to the file
+  $yaml->write($szYamlFileName);
+  
 }
 
 # This ends the perl module/package definition.

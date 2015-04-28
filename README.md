@@ -31,6 +31,7 @@ ssh -i /var/virman/.ssh/virman -l vagrant 169.254.0.8
 /opt/virman/bin/virman-delete.pl  tip
 
 #TODO Do the Network merge for the IPMergeInstanceAndWrapperInfo
+TODO V Support the 'TargetFile' for the Yaml data., this would require changes to the GlobalYaml.pm.
 TODO Do the Run command merge for IPMergeInstanceAndWrapperInfo
 TODO V gracefully handle empty tags, like <RunCommand></RunCommand>, currently it becomes a hash, it should just be an empty string.
 TODO Read the install wrapper, if the app references one.
