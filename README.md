@@ -12,7 +12,7 @@ Delete the image box
 
 
 Create the base image 'rhel63_x86_64' used by e.g. 'box'
-virt-install --name rhel63_x86_64 --memory 768 --disk "pool=qcows,bus=virtio,size=10" --vcpus 1 --location http://169.254.0.3/images/rhel_63_x86_64 --graphics none --extra-args="acpi=on console=tty0 console=ttyS0,115200 ks=http://169.254.0.3/configs/ks_rhel-63-x86_64_http_kvm_guest.cfg" --network bridge:virbrconf
+virt-install --name rhel63_x86_64 --memory 768 --disk "pool=qcows,bus=virtio,size=10" --vcpus 1 --location http://169.254.0.3/images/rhel-6Server-x86_64 --graphics none --extra-args="acpi=on console=tty0 console=ttyS0,115200 ks=http://169.254.0.3/configs/ks_rhel-6Server-x86_64_http_kvm_guest.cfg" --network bridge:virbrconf
 
 * Remove the udev network rules and the ifcfg.
 *  Add --dryrun --verbose to just test it.

@@ -85,9 +85,13 @@ sub DefaultGetBaseStoragePath {
 sub DefaultGetCloudInitIsoFilesPath {
   my $xmlTree = shift;
 
-  # TODO Barf if XML tree is undef, or not an XML?
+  confess("!!! xmlTree undefined.") unless(defined($xmlTree));
 
-  return($xmlTree->{'CloudInitIsoFilesPath'}[0]);
+  my $szResult = $xmlTree->{'CloudInitIsoFilesPath'}[0];
+
+  confess("!!! <CloudInitIsoFilesPath> in the virman default.xml file is invalid/empty. expected a scalar type got " . ref($szResult)) unless( ref($szResult) eq "" );
+
+  return($szResult);
 }
 
 # -----------------------------------------------------------------

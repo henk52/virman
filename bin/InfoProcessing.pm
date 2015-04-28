@@ -192,6 +192,7 @@ sub IPSetMachineConfiguration {
   # TODO V put this in a proctected subdir.
     # This is where all the pre-instance files are stored.
   
+
   # TODO N Does this 'InstanceTempDirectory' really belong in the $refhMachineConfiguration or should it rather be in $refhInstanceConfiguration
   $refhMachineConfiguration->{'InstanceTempDirectory'} = "$refhVirmanConfiguration->{'CloudInitIsoFiles'}/$refhMachineConfiguration->{'szGuestName'}${szInstanceNumber}";
   
