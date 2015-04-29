@@ -135,7 +135,11 @@ my %hExpectedMergedConfigs = (
                                                             'SourceType' => 'Base64',
                                                             'DestinationFile' => '/vagrant/alpha.tgz'
                                                           }
-                                           }
+                                           },
+          'ScalarKeyValues' => {
+            'AppPuppetClassName' => 'app-tut',
+            'Charlie' => 'CValue'            
+          },
 );
 #print Dumper(\%hInstanceConfiguration);
 is_deeply(\%hInstanceConfiguration, \%hExpectedMergedConfigs, 'IPMergeInstanceAndWrapperInfo()');

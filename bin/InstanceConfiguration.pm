@@ -43,7 +43,7 @@ use XML::Simple;
 use Common;
 
 
-$VERSION = 0.4.0;
+$VERSION = 0.5.0;
 @ISA = ('Exporter');
 
 # List the functions and var's that must be available.
@@ -53,6 +53,7 @@ $VERSION = 0.4.0;
                 &GetDescription
                 &GetInstanceType
                 &GetNameOfAdminUserAccount
+                &InstCfgGetConfigKeyValue
                 &InstCfgGetFileProvidedDuringCloudInit
                 &InstCfgGetInstallWrapper
                 &InstCfgGetNetworkHash
@@ -112,6 +113,24 @@ sub GetNameOfAdminUserAccount {
   return($xmlTree->{'NameOfAdminUserAccount'}[0]);
 }
 
+
+# -----------------------------------------------------------------
+#** @function [public|protected|private] [return-type] function-name (parameters)
+# @brief A brief description of the function
+#
+# A detailed description of the function
+# @params value [required|optional] [details]
+# @retval value [details]
+# ....
+#*
+# ---------------
+sub InstCfgGetConfigKeyValue {
+  my $xmlTree = shift;
+
+  confess("!!! no XML tree given as a parameter.") unless(defined($xmlTree));
+  
+  return(CmnGetConfigKeyValue($xmlTree));
+}
 
 # -----------------------------------------------------------------
 #** @function [public|protected|private] [return-type] function-name (parameters)
@@ -227,6 +246,9 @@ sub InstCfgLoadInstanceConfiguration {
   # Get the file for installation.
   my %hFileProvidedDuringCloudInit = InstCfgGetFileProvidedDuringCloudInit($xmlTree);
   $refConfHash->{'FileProvidedDuringCloudInit'} = \%hFileProvidedDuringCloudInit;
+  
+  my %hScalarKeyValues = InstCfgGetConfigKeyValue($xmlTree);
+  $refConfHash->{'ScalarKeyValues'} = \%hScalarKeyValues;
   
   # Get the run commands.
   my @arRunCommandList = InstCfgGetRunCommandsList($xmlTree);

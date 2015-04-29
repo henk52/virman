@@ -143,6 +143,13 @@ sub IPMergeInstanceAndWrapperInfo {
       push($refhInstanceConfiguration->{'RunCommand'}, $szEntry);
     }
   }
+  
+  if ( exists ($refhInstallWrapperConfiguration->{'ScalarKeyValues'}) ) {
+    foreach my $szEntry ( keys %{$refhInstallWrapperConfiguration->{'ScalarKeyValues'}}  ) {
+      $refhInstanceConfiguration->{'ScalarKeyValues'}{$szEntry} = $refhInstallWrapperConfiguration->{'ScalarKeyValues'}{$szEntry};
+    }
+  }
+  
   #die("!!! Hey look here....");  
 } # end IPMergeInstanceAndWrapperInfo
 

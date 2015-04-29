@@ -45,13 +45,14 @@ use Data::Dumper;
 
 
 
-$VERSION = 0.2.0;
+$VERSION = 0.3.0;
 @ISA = ('Exporter');
 
 # List the functions and var's that must be available.
 # If you want to create a global var, create it as 'our'
 @EXPORT = qw(
                 &CmnAddFileEntry
+                &CmnGetConfigKeyValue
                 &CmnGetFileProvidedDuringCloudInit
                 &CmnReturnArrayEmptyIfNotExist
             );
@@ -99,6 +100,32 @@ sub CmnAddFileEntry {
   $refhFileStructure->{$szFileName}{'DestinationFile'}  = $szTargetDestination;
 } # end CmnAddFileEntry.
 
+
+# -----------------------------------------------------------------
+#** @function [public|protected|private] [return-type] function-name (parameters)
+# @brief A brief description of the function
+#
+# A detailed description of the function
+# @params value [required|optional] [details]
+# @retval value [details]
+# ....
+#*
+# ---------------
+sub CmnGetConfigKeyValue {
+  my $xmlTree = shift;
+
+  confess("!!! no XML tree given as a parameter.") unless(defined($xmlTree));
+  
+  my %hScalarKeyValues;
+  
+  if ( exists($xmlTree->{'ConfigKeyValue'}) ) {
+    foreach my $refFileEntry (@{$xmlTree->{'ConfigKeyValue'}}) {
+      $hScalarKeyValues{${$refFileEntry->{'Key'}}[0]}      = ${$refFileEntry->{'Value'}}[0];
+    } # end foreach.
+  } # end if.
+  
+  return(%hScalarKeyValues);  
+}
 # -----------------------------------------------------------------
 #** @function [public|protected|private] [return-type] function-name (parameters)
 # @brief A brief description of the function

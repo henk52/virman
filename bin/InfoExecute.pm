@@ -34,7 +34,7 @@ use strict;
 #---------------------------- PROJECT SPECIFIC DATA -----------------------------
 #
 #---------------------------- DESCRIPTION OF LOGIC ------------------------------
-#
+# 
 #
 ################################################################################
 
@@ -53,7 +53,7 @@ use GlobalYaml;
 use Common;
 
 
-$VERSION = 0.3.0;
+$VERSION = 0.4.0;
 @ISA     = ('Exporter');
 
 # List the functions and var's that must be available.
@@ -146,6 +146,7 @@ sub IEGenerateCloudInitIsoImage {
 
   # Generate the 'global.yaml' file for the instance.
   GYUpdateNetworkCfg($refhCombinedInstanceAndWrapperConf->{'NetworkConfiguration'}, $szGlobalYamlFileName);
+  GYUpdateScalar($szGlobalYamlFileName, $refhCombinedInstanceAndWrapperConf->{'NetworkConfiguration'} );
   
 
   # Add the global.yaml to the list of files to include on the iso.

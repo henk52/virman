@@ -105,7 +105,11 @@ my %hExpectedConfiguration = (
                                              'Name' => 'inst2'
                                            }
                                     },
-          'Description' => 'Monitor machine'
+          'Description' => 'Monitor machine',
+          'ScalarKeyValues' => {
+            'AppPuppetClassName' => 'app-tut',
+            'Charlie' => 'CValue'            
+          },
     );
 
 my %hActualConfiguration;

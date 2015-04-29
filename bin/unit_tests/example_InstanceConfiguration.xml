@@ -31,6 +31,14 @@
     <SourceType>Base64</SourceType>
     <DestinationFile>/vagrant/bravo.tgz</DestinationFile>
   </FileProvidedDuringCloudInit>
+  <ConfigKeyValue TargetFile="global" Type="yaml">
+    <Key>AppPuppetClassName</Key>
+    <Value>app-tut</Value>
+  </ConfigKeyValue>
+  <ConfigKeyValue TargetFile="global" Type="yaml">
+    <Key>Charlie</Key>
+    <Value>CValue</Value>
+  </ConfigKeyValue>
   <RunCommand>command1</RunCommand>
   <RunCommand>command2</RunCommand>
   <InstallWrapper>ripwrap</InstallWrapper>
