@@ -146,7 +146,7 @@ sub IEGenerateCloudInitIsoImage {
 
   # Generate the 'global.yaml' file for the instance.
   GYUpdateNetworkCfg($refhCombinedInstanceAndWrapperConf->{'NetworkConfiguration'}, $szGlobalYamlFileName);
-  GYUpdateScalar($szGlobalYamlFileName, $refhCombinedInstanceAndWrapperConf->{'NetworkConfiguration'} );
+  GYUpdateScalar($szGlobalYamlFileName, $refhCombinedInstanceAndWrapperConf->{'ScalarKeyValues'});
   
 
   # Add the global.yaml to the list of files to include on the iso.
