@@ -45,7 +45,7 @@ use Data::Dumper;
 
 use YAML::Tiny;
 
-$VERSION = 0.3.0;
+$VERSION = 0.3.1;
 @ISA     = ('Exporter');
 
 # List the functions and var's that must be available.
@@ -124,7 +124,7 @@ sub GYUpdateNetworkCfg {
                'ip_addr'  =>  $refhNetworkConfig->{$szIndex}{'IpAddress'},
                'netmask'  =>  $refhNetworkConfig->{$szIndex}{'NetMask'}
                );
-        $hYamlDynamicNetConfig{ "vnic"
+        $hYamlStaticNetConfig{ "vnic"
             . $refhNetworkConfig->{$szIndex}{'Name'} } = \%hNic;
       }
     }    # end if autoassingment.
@@ -161,29 +161,32 @@ sub GYUpdateScalar {
   my $szYamlFileName   = shift;
   my $refhKeyValueList = shift;
   
-  die("!!! Filename is not given.") unless ( defined($szYamlFileName) );
-  die("!!! network config hash not provided.") unless ( defined($refhKeyValueList) );
+  confess("!!! Filename is not given.") unless ( defined($szYamlFileName) );
+  #confess("!!! KeyValue list hash not provided.") unless ( defined($refhKeyValueList) );
 
-  my $pYamlFileHandle;
-  my $yaml;
+  # Sometimes there might be no scalar vlues to define.
+  if ( defined($refhKeyValueList) ) {
+    my $pYamlFileHandle;
+    my $yaml;
 
-  if ( !-f $szYamlFileName ) {
-    #open($pYamlFileHandle, ">$szYamlFileName") || die("!!! could not open file for write: $szYamlFileName - $!");
-    $yaml = YAML::Tiny->new();
-  } else {
-    #open($pYamlFileHandle, "$szYamlFileName") || die("!!! could not open file for read/write: $szYamlFileName - $!");
-    $yaml = YAML::Tiny->read($szYamlFileName);
-  }
+    if ( !-f $szYamlFileName ) {
+      #open($pYamlFileHandle, ">$szYamlFileName") || die("!!! could not open file for write: $szYamlFileName - $!");
+      $yaml = YAML::Tiny->new();
+    } else {
+      #open($pYamlFileHandle, "$szYamlFileName") || die("!!! could not open file for read/write: $szYamlFileName - $!");
+      $yaml = YAML::Tiny->read($szYamlFileName);
+    }
   
   
-  # TODO Itterate through the list and add the values to the YAML file.
-  foreach my $szKey (keys $refhKeyValueList) {
-    $yaml->[0]->{"$szKey"} = "$refhKeyValueList->{$szKey}";
-  }
+    # TODO Itterate through the list and add the values to the YAML file.
+    foreach my $szKey (keys $refhKeyValueList) {
+      $yaml->[0]->{"$szKey"} = "$refhKeyValueList->{$szKey}";
+    }
   
   
-  # Save the document back to the file
-  $yaml->write($szYamlFileName);
+    # Save the document back to the file
+    $yaml->write($szYamlFileName);
+  } # endif hash defined.
   
 }
 
